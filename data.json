@@ -2,26 +2,128 @@
   "_notice": "예시 데이터 (실제 조건 아님). 모든 숫자는 화면 확인용 가정입니다.",
   "installmentRate": 5.9,
   "models": {
-    "갤럭시 S26": {"price": 1250000},
-    "갤럭시 Z 플립7": {"price": 1480000},
-    "아이폰 17": {"price": 1300000},
-    "아이폰 17 Pro": {"price": 1650000},
-    "갤럭시 A57": {"price": 550000}
+    "갤럭시 S26": {
+      "price": 1250000
+    },
+    "갤럭시 Z 플립7": {
+      "price": 1480000
+    },
+    "아이폰 17": {
+      "price": 1300000
+    },
+    "아이폰 17 Pro": {
+      "price": 1650000
+    },
+    "갤럭시 A57": {
+      "price": 550000
+    }
   },
   "carriers": {
-    "SKT": {"subsidyChange": 300000, "subsidyPort": 500000, "requiredPlan": 109000, "requiredMonths": 6, "addon": 9900, "addonMonths": 3, "familyDiscount": 10000, "penaltyPerMonth": 15000},
-    "KT": {"subsidyChange": 280000, "subsidyPort": 520000, "requiredPlan": 105000, "requiredMonths": 6, "addon": 8800, "addonMonths": 3, "familyDiscount": 9000, "penaltyPerMonth": 14000},
-    "LGU+": {"subsidyChange": 290000, "subsidyPort": 550000, "requiredPlan": 105000, "requiredMonths": 6, "addon": 9900, "addonMonths": 3, "familyDiscount": 9000, "penaltyPerMonth": 14000},
-    "알뜰폰": {"subsidyChange": 0, "subsidyPort": 0, "requiredPlan": 0, "requiredMonths": 0, "addon": 0, "addonMonths": 0, "familyDiscount": 0, "penaltyPerMonth": 3000}
+    "SKT": {
+      "subsidyChange": 300000,
+      "subsidyPort": 500000,
+      "requiredPlan": 109000,
+      "requiredMonths": 6,
+      "addon": 9900,
+      "addonMonths": 3,
+      "familyDiscount": 10000,
+      "penaltyPerMonth": 15000
+    },
+    "KT": {
+      "subsidyChange": 280000,
+      "subsidyPort": 520000,
+      "requiredPlan": 105000,
+      "requiredMonths": 6,
+      "addon": 8800,
+      "addonMonths": 3,
+      "familyDiscount": 9000,
+      "penaltyPerMonth": 14000
+    },
+    "LGU+": {
+      "subsidyChange": 290000,
+      "subsidyPort": 550000,
+      "requiredPlan": 105000,
+      "requiredMonths": 6,
+      "addon": 9900,
+      "addonMonths": 3,
+      "familyDiscount": 9000,
+      "penaltyPerMonth": 14000
+    },
+    "알뜰폰": {
+      "subsidyChange": 0,
+      "subsidyPort": 0,
+      "requiredPlan": 0,
+      "requiredMonths": 0,
+      "addon": 0,
+      "addonMonths": 0,
+      "familyDiscount": 0,
+      "penaltyPerMonth": 3000
+    }
   },
   "mnoPlansByData": [
-    {"maxGB": 10, "price": 55000},
-    {"maxGB": 50, "price": 69000},
-    {"maxGB": 9999, "price": 89000}
+    {
+      "maxGB": 10,
+      "price": 55000
+    },
+    {
+      "maxGB": 50,
+      "price": 69000
+    },
+    {
+      "maxGB": 9999,
+      "price": 89000
+    }
   ],
   "mvnoPlansByData": [
-    {"maxGB": 10, "price": 15000},
-    {"maxGB": 50, "price": 25000},
-    {"maxGB": 9999, "price": 33000}
-  ]
+    {
+      "maxGB": 10,
+      "price": 15000
+    },
+    {
+      "maxGB": 50,
+      "price": 25000
+    },
+    {
+      "maxGB": 9999,
+      "price": 33000
+    }
+  ],
+  "sampleModels": {
+    "_notice": "예시 기준값 (실제 출고가 아님). 예시 견적서 생성에만 사용.",
+    "list": [
+      [
+        "갤럭시 S 시리즈 (기본)",
+        1250000
+      ],
+      [
+        "갤럭시 S 시리즈 (울트라)",
+        1700000
+      ],
+      [
+        "갤럭시 Z 플립",
+        1480000
+      ],
+      [
+        "갤럭시 Z 폴드",
+        2400000
+      ],
+      [
+        "갤럭시 A 시리즈",
+        550000
+      ],
+      [
+        "아이폰 (기본)",
+        1300000
+      ],
+      [
+        "아이폰 프로",
+        1650000
+      ],
+      [
+        "아이폰 프로 맥스",
+        1900000
+      ]
+    ],
+    "defaultPrice": 1250000
+  }
 }

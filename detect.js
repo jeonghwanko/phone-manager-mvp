@@ -24,7 +24,7 @@ const P={signal:'<path d="M5 18v-3M10 18v-6M15 18V9M20 18V5"/>',eye:'<path d="M2
 const svg=(n,z=20)=>`<svg width="${z}" height="${z}" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">${P[n]}</svg>`;
 const ICON={'고가 요금제 유지':'signal','할부원금 0원 착시':'eye','부가서비스 유지 조건':'puzzle','할부 이자':'percent','카드 할인 조건':'card','페이백 조건':'hand'};
 function trapAmt(x,r,q){if(x.won)return {v:x.won,l:'더 내는 돈'};if(x.t.includes('0원'))return {v:r.planExtra,l:'요금제로 내는 돈'};if(x.t.includes('카드'))return {v:q.cardSpend||0,l:'매달 써야 할 카드 실적'};if(x.t.includes('페이백'))return {v:r.cashback,l:'못 받을 수도 있는 돈'};return {v:0,l:''}}
-async function analyze(t){me(t);const q=Quote.parse(t);
+async function analyze(t,sample){me(t);const q=Quote.parse(t);
  if(q.plan==null&&q.principal==null&&q.cash==null&&q.device==null)return say([['금액을 못 찾았어요.','err'],'예: 할부원금 0원, 요금제 109,000원 6개월 유지']).then(startChips);
  R={q,r:Quote.calc(q)};const r=R.r,exp=r.headline+r.base*24,mx=Math.max(r.total,exp,1),pc=v=>Math.max(0,v/mx*100).toFixed(1);
  const traps=r.traps.map(x=>({...x,a:trapAmt(x,r,q)})).sort((x,y)=>y.a.v-x.a.v);
@@ -45,11 +45,11 @@ async function analyze(t){me(t);const q=Quote.parse(t);
  if(q.card)act.push(`<b>카드 할인</b> 빼고 다시 계산`);
  if(r.planExtra)act.push(`요금제 <b>유지 기간</b> 줄여달라기`);
  list.push([`<div class="ttl">이렇게 하세요</div><ol class="steps">${(act.length?act:['이대로 진행해도 괜찮아요.']).slice(0,3).map(x=>`<li><span>${x}</span></li>`).join('')}</ol>`,'card']);
- list.push([`<div class="share"><canvas width="1080" height="1080" aria-label="호갱 지수 공유 이미지"></canvas><div class="btns"><button class="btn dl" type="button">이미지 저장</button><button class="btn pri sh" type="button">공유하기</button></div><div class="disc">참고용 계산이에요. 실제 계약 조건과 다를 수 있어요.</div>${footerHTML()}</div>`,'card']);
+ list.push([`<div class="share"><canvas width="1080" height="1080" aria-label="호갱 지수 공유 이미지"></canvas><div class="btns"><button class="btn dl" type="button">이미지 저장</button><button class="btn pri sh" type="button">공유하기</button></div><div class="disc">참고용 계산이에요. 실제 계약 조건과 다를 수 있어요.</div></div>`,'card']);
  const c=await say(list);track('analyze_done');
  draw(c.querySelector('canvas'));c.querySelector('.dl').onclick=()=>{const a=document.createElement('a');a.href=c.querySelector('canvas').toDataURL('image/png');a.download='hogang.png';a.click()};c.querySelector('.sh').onclick=()=>share(c.querySelector('canvas'));
  await say(['더 궁금하면 물어보세요.']);
- setChips([['공유하기',()=>share(c.querySelector('canvas'))],['판매점에 물어보기',askDealer],['어떻게 깎아요?',()=>ask('어떻게 깎아요?')],['부가 언제 해지?',()=>ask('부가서비스 언제 해지해?')],['다른 견적서',()=>{R=null;say(['새 견적서를 올려주세요.']).then(startChips)}]])}
+ setChips([['공유하기',()=>share(c.querySelector('canvas'))],['판매점에 물어보기',askDealer],['어떻게 깎아요?',()=>ask('어떻게 깎아요?')],['부가 언제 해지?',()=>ask('부가서비스 언제 해지해?')],['다른 견적서',()=>{R=null;say(['새 견적서를 붙여넣거나 예시를 골라주세요.']).then(()=>setChips(TYPES.map((t,i)=>[t,()=>pickModel(i)])))}]])}
 function draw(cv){const x=cv.getContext('2d'),r=R.r,F='"Pretendard Variable",Pretendard,"Apple SD Gothic Neo",sans-serif',col=r.score>=60?'#e8434d':r.score>=30?'#e8930c':'#10a05a';
  x.fillStyle='#f4f5f7';x.fillRect(0,0,1080,1080);x.fillStyle='#fff';x.beginPath();x.roundRect(64,64,952,952,56);x.fill();
  x.textAlign='left';x.fillStyle='#8b919a';x.font=`600 34px ${F}`;x.fillText('휴대폰 견적서 호갱 판독기',136,168);
@@ -73,7 +73,7 @@ function askDealer(){me('이 견적으로 판매점에 물어볼래요');const D
  const rows=D.length?`<ul class="traps">${D.map((d,i)=>`<li><button type="button" class="dealer" data-i="${i}"><span class="tm"><span class="t">${esc(d.name)}</span><span class="cap">${d.link.startsWith('tel:')?'전화':'카카오톡'}${d.code?' · 추천 코드 포함':''}</span></span><span class="amt" style="color:var(--brand)">문의 ›</span></button></li>`).join('')}</ul><div class="disc">제휴 판매점이에요. 운영자가 소개 혜택을 받을 수 있어요.</div>`:`<p style="margin:0 0 4px">제휴 판매점 준비 중이에요.</p>`;
  say([[`<div class="ttl">판매점에 직접 물어보기</div>${rows}<div class="btns"><button class="btn${D.length?'':' pri'} cp" type="button">견적 요약 복사</button></div><div class="disc">요약에는 금액만 들어가요. 판매점과 직접 연락하며, 운영자는 개인정보를 받지 않아요.</div>`,'card']]).then(el=>{
   el.querySelector('.cp').onclick=async()=>{track('copy_summary');say([await copy(summaryText())?'요약을 복사했어요.':['복사하지 못했어요.','err']])};
-  el.querySelectorAll('.dealer').forEach(b=>b.onclick=async()=>{const d=D[+b.dataset.i];await copy(summaryText(d.code));track('dealer_click');window.open(d.link,d.link.startsWith('tel:')?'_self':'_blank','noopener')})})}
+  el.querySelectorAll('.dealer').forEach(b=>b.onclick=()=>{const d=D[+b.dataset.i];const c=copy(summaryText(d.code));track('dealer_click');if(d.link.startsWith('tel:'))location.href=d.link;else window.open(d.link,'_blank','noopener');c.then(ok=>say([ok?'요약을 복사했어요. 판매점 대화창에 붙여넣으세요.':['요약 복사에 실패했어요. 요약 복사 버튼을 눌러주세요.','err']]))})})}
 function answer(q){const r=R.r,f=k=>r.traps.find(t=>t.t.includes(k));
  if(/부가|해지/.test(q))return R.q.addonCount?`부가서비스 ${R.q.addonCount}개는 ${R.q.addonMonths}개월 유지 조건이에요. 개통일로부터 ${R.q.addonMonths}개월 + 하루 뒤에 통신사 앱이나 114로 해지하세요. 총 ${W(r.addon)}이에요.`:'견적서에 부가서비스 조건이 없어요.';
  if(/깎|협상|싸게|줄이/.test(q))return `① 고가 요금제 유지 기간을 줄여달라고 하기${r.planExtra?` (지금 차액 ${W(r.planExtra)})`:''} ② 부가서비스 빼달라고 하기${r.addon?` (${W(r.addon)})`:''} ③ 현금완납 가격을 물어보기${r.interest?` (이자 ${W(r.interest)} 절약)`:''} ④ 페이백은 계약서에 적어달라고 하기.`;
@@ -89,18 +89,32 @@ async function ask(q){if(/견적\s*(요청|받)|판매점/.test(q)&&R)return ask
  const j=await res.json(),a=j.choices?.[0]?.message?.content||j.reply||j.output_text;if(!a)throw 0;history.push({role:'assistant',content:a});t.remove();await say(a.split(/\n+|(?<=[.!?])\s+/).filter(Boolean).map(esc));return}catch(e){t.remove()}}
  const c=chips.innerHTML,saved=[...chips.children];await say(split(answer(q)));chips.innerHTML='';saved.forEach(x=>chips.append(x))}
 function split(t){return t.replace(/(\d[\d,]*원)/g,'<b>$1</b>').split(/(?<=[.?!요다]\.?)\s+(?=[가-힣①②③④"])|(?=[②③④])/).map(x=>x.trim()).filter(Boolean)}
-$('bar').onsubmit=e=>{e.preventDefault();const t=$('q').value.trim();$('q').value='';$('q').style.height='';if(!t)return;if(looksLikeQuote(t)||!R)return analyze(t);ask(t)};
+$('bar').onsubmit=e=>{e.preventDefault();const t=$('q').value.trim();$('q').value='';$('q').style.height='';if(!t)return;if(pendingType!=null)return customModel(t);if(looksLikeQuote(t)||!R)return analyze(t);ask(t)};
 $('q').oninput=e=>{e.target.style.height='auto';e.target.style.height=Math.min(160,e.target.scrollHeight)+'px'};
-$('q').onkeydown=e=>{if(e.key==='Enter'&&!e.shiftKey&&!e.isComposing&&!/\n/.test(e.target.value)&&e.target.value.length<40){e.preventDefault();$('bar').requestSubmit()}};
+$('q').onkeydown=e=>{if(e.key==='Enter'&&!e.shiftKey&&!e.isComposing&&!/\n/.test(e.target.value)&&e.target.value.length<40&&!(pendingType==null&&/(출고가|할부원금|완납|요금제)/.test(e.target.value))){e.preventDefault();$('bar').requestSubmit()}};
 document.querySelector('label.ibtn').onkeydown=e=>{if(e.key==='Enter'||e.key===' '){e.preventDefault();$('file').click()}};
 $('file').onchange=async e=>{const f=e.target.files[0];if(!f)return;e.target.value='';me('📷 견적서 사진');const t=typing();t.innerHTML='OCR 엔진 불러오는 중…<div class="prog"><i></i></div>';
  try{if(!window.Tesseract)await new Promise((ok,no)=>{const s=document.createElement('script');s.src='https://cdn.jsdelivr.net/npm/tesseract.js@5/dist/tesseract.min.js';s.onload=ok;s.onerror=no;document.head.append(s)});
   t.innerHTML='글자 읽는 중… <span class="num">0%</span><div class="prog"><i></i></div><div class="cap">처음엔 10~30초 걸려요</div>';const {data}=await Tesseract.recognize(f,'kor+eng',{logger:m=>{if(m.status==='recognizing text'){const p=Math.round(m.progress*100);t.querySelector('.num').textContent=p+'%';t.querySelector('.prog i').style.width=p+'%'}}});t.remove();const txt=data.text.trim();
   if(!txt)throw 0;await say(['읽은 내용이에요.','틀린 숫자만 고쳐 보내주세요.']);$('q').value=txt;$('q').dispatchEvent(new Event('input'));$('q').focus()}
  catch(err){t.remove();say([['사진을 못 읽었어요.','err'],'글자로 붙여넣어 주세요.'])}};
-const SI=['eye','coin','cal'],DESC=['할부원금 0원 · 고가 요금제 6개월','현금완납 45만원 · 페이백 10만원','할부원금 98만원 · 이자 5.9%'];
+let MODELS=null,pendingType=null;fetch('data.json').then(r=>r.json()).then(d=>{MODELS=d.sampleModels}).catch(()=>{});
+const TYPES=['공짜폰이라는데?','현금완납 특가','36개월 할부'],M=n=>Math.round(n/10000)*10000;
+function makeQuote(i,name,price){if(i===0)return `${name} 출고가 ${W(price)}\n할부원금 0원\n요금제 109,000원 6개월 유지, 이후 요금제 55,000원\n부가 2개 월 9,900원 3개월\n카드 할인 월 1.5만원 (전월 실적 30만원)`;
+ if(i===1)return `${name} 현금완납 ${W(M(price*0.35))}\n요금제 월 9만원 6개월 유지, 이후 요금제 4만원\n부가서비스 3개 월 8,800원 4개월\n페이백 10만원`;
+ return `${name} 출고가 ${W(price)}\n할부원금 ${W(M(price*0.66))} 36개월 할부, 이자 5.9%\n요금제 월 8만9천원 24개월 유지, 평소 요금 6만원\n부가 1개 월 5,500원 2개월`}
+async function pickModel(i){pendingType=null;me(TYPES[i]+' 예시로 해볼래요');const L=(MODELS&&MODELS.list)||[];
+ const el=await say([['어떤 폰이에요?<div class="cap">가격은 <b>예시 기준값</b>이에요.</div>'],[`<ul class="traps models">${L.map(([n,p],j)=>`<li><button type="button" class="dealer" data-j="${j}"><span class="tm"><span class="t">${n}</span></span><span class="cap num">${man(p)}</span></button></li>`).join('')}<li><button type="button" class="dealer" data-j="-1"><span class="tm"><span class="t">직접 입력</span></span><span class="cap">›</span></button></li></ul>`,'card']]);
+ el.querySelectorAll('button').forEach(b=>b.onclick=()=>{const j=+b.dataset.j;el.querySelectorAll('button').forEach(x=>x.disabled=true);
+  if(j<0){pendingType=i;me('직접 입력');say(['폰 이름을 적어주세요.','출고가도 알면 함께 적어주세요. 예: 갤럭시 S25 115만원']).then(()=>$('q').focus());return}
+  const [n,p]=L[j];analyze(makeQuote(i,n,p),true)})}
+function customModel(t){const i=pendingType;pendingType=null;const m=t.match(/(\d[\d,.]*\s*만\s*(?:\d+\s*천)?\s*원?|\d{6,7}\s*원?)/);let price=m?Quote.num(m[1]):null;
+ let name=(m?t.replace(m[0],''):t).replace(/출고가|가격|원/g,'').trim().slice(0,30)||'내 폰';me(t);
+ const note=price?null:`출고가를 몰라서 예시 기준값 ${man(MODELS?MODELS.defaultPrice:1250000)}으로 만들었어요.`;price=price||(MODELS?MODELS.defaultPrice:1250000);
+ (note?say([note]):Promise.resolve()).then(()=>analyze(makeQuote(i,name,price),true))}
+const SI=['eye','coin','cal'],DESC=['할부원금 0원 · 고가 요금제 6개월','현금완납 · 페이백 10만원','36개월 할부 · 이자 5.9%'];
 (()=>{const h=document.createElement('section');h.className='hero';h.innerHTML=`<h2>견적서에 안 보이는<br>진짜 비용을 찾아드려요</h2><div class="samples" role="list"></div>`;
- Object.keys(SAMPLES).forEach((k,i)=>{const b=document.createElement('button');b.type='button';b.className='sample';b.setAttribute('role','listitem');b.innerHTML=`<span class="ic">${svg(SI[i])}</span><span class="tm"><span class="s">${k.split(' ').slice(1).join(' ')}</span><span class="d">${DESC[i]}</span></span><span class="chev" aria-hidden="true">›</span>`;b.onclick=()=>analyze(SAMPLES[k]);h.querySelector('.samples').append(b)});
- h.insertAdjacentHTML('beforeend',footerHTML());log.append(h)})();
+ Object.keys(SAMPLES).forEach((k,i)=>{const b=document.createElement('button');b.type='button';b.className='sample';b.setAttribute('role','listitem');b.innerHTML=`<span class="ic">${svg(SI[i])}</span><span class="tm"><span class="s">${k.split(' ').slice(1).join(' ')}</span><span class="d">${DESC[i]}</span></span><span class="chev" aria-hidden="true">›</span>`;b.onclick=()=>pickModel(i);h.querySelector('.samples').append(b)});
+ h.insertAdjacentHTML('afterbegin',footerHTML().replace('class="foot"','class="foot top"'));log.append(h)})();
 startChips();
 if(location.hash==='#demo'){window.FAST=1;analyze(SAMPLES[Object.keys(SAMPLES)[0]])}

@@ -101,3 +101,5 @@ table{width:100%;border-collapse:collapse;font-size:14px;margin-top:4px}td{paddi
 body.page{display:block;height:auto}
 .doc td{text-align:left!important;font-weight:400!important;color:var(--text)!important}.doc td:first-child,.doc th:first-child{white-space:nowrap;padding-right:12px}
 .dealer{display:flex;align-items:center;gap:12px;width:100%;min-height:56px;padding:12px 0;border:0;background:none;text-align:left;cursor:pointer}
+.foot.top{padding:0 0 12px;text-align:left}
+.models .dealer .cap{white-space:nowrap}
