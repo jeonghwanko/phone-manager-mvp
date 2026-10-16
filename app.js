@@ -21,7 +21,7 @@ function edit(i){editing=true;step=i;bot(`"${Q[i].q}" 다시 알려주세요.`).
 function input(t){t=t.trim();if(!t)return;
  if(step<Q.length){if(/^(뒤로|이전)/.test(t)){me(t);return back()}
   const s=Q[step],v=s.p(t);me(t,v==null?null:step);if(v==null){const e=typeof s.err==='function'?s.err():s.err;return bot(e)}
-  A[s.k]=v;if(editing){editing=false;step=Q.length;return result()}step++;return step<Q.length?ask():result()}
+  A[s.k]=v;if(editing){editing=false;const nx=Q.findIndex(x=>A[x.k]==null);if(nx<0){step=Q.length;return result()}step=nx;return ask()}step++;return step<Q.length?ask():result()}
  me(t);followUp(t)}
 function compute(){const inp={...A,rate:D.installmentRate};res={24:Engine.compare(inp,D,24),36:Engine.compare(inp,D,36)}}
 function card(){const r=res[months],rows=[['단말기','device'],['지원금','subsidy'],['할부이자','interest'],['요금','plan'],['부가서비스','addon'],['가족결합','family'],['위약금','penalty'],['총비용','total']],s=r.options[1];
