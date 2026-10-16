@@ -35,7 +35,7 @@ async function analyze(t){me(t);const q=Quote.parse(t);
   [`<div class="ttl">예상 vs 실제</div>
   <div class="barrow"><div class="lab"><span>예상한 돈</span><b class="num">${man(exp)}</b></div><div class="track"><div class="fill" style="width:${pc(exp)}%"><div class="seg-a" style="flex:1"></div></div></div></div>
   <div class="barrow"><div class="lab"><span>실제로 낼 돈</span><b class="num">${man(r.total)}</b></div><div class="track"><div class="fill" style="width:${pc(r.total)}%"><div class="seg-b" style="flex:${Math.max(0,r.total-r.hidden)}"></div><div class="seg-x" style="flex:${r.hidden}"></div></div></div></div>
-  ${r.ref.length?`<div class="tag">예시 기준값 포함</div>`:''}<details><summary>자세히</summary><table>${rows.map(([k,v])=>`<tr><td>${k}</td><td class="num">${W(v)}</td></tr>`).join('')}</table><p class="cap">견적서대로 생각한 돈 = 견적서 기기 금액 + 평소 요금×24개월. 숨은 비용 = 실제 총액 − 견적서 기기 금액 − 평소 요금×24개월.</p>${r.ref.length?`<p class="cap">견적서에 없어서 쓴 <b>예시 기준값</b>: ${r.ref.join(', ')}</p>`:''}</details>`,'card']];
+  ${r.ref.length?`<div class="tag">예시 기준값 포함</div>`:''}<details><summary>자세히</summary><table>${rows.map(([k,v])=>`<tr><td>${k}</td><td class="num">${W(v)}</td></tr>`).join('')}</table><p class="cap">견적서 숫자로만 계산해요. 없는 값은 예시 기준값을 써요.</p><p class="cap">견적서대로 생각한 돈 = 견적서 기기 금액 + 평소 요금×24개월. 숨은 비용 = 실제 총액 − 견적서 기기 금액 − 평소 요금×24개월.</p>${r.ref.length?`<p class="cap">견적서에 없어서 쓴 <b>예시 기준값</b>: ${r.ref.join(', ')}</p>`:''}</details>`,'card']];
  if(!traps.length)list.push('함정은 안 보여요.');
  if(traps.length)list.push([`<div class="ttl">함정 ${traps.length}개</div><ul class="traps">${traps.map(x=>`<li><details><summary><span class="ic">${svg(ICON[x.t]||'eye')}</span><span class="tm"><span class="t">${x.t}</span></span><span class="amt num">${x.a.v?man(x.a.v):'-'}</span></summary><p>${x.a.l}: <b>${W(x.a.v)}</b><br>${esc(x.msg)}</p></details></li>`).join('')}</ul>`,'card']);
  const act=[];if(q.addonCount)act.push(`${q.addonMonths}개월 뒤 <b>부가서비스 해지</b>`);
@@ -87,7 +87,7 @@ $('file').onchange=async e=>{const f=e.target.files[0];if(!f)return;e.target.val
   if(!txt)throw 0;await say(['읽은 내용이에요.','틀린 숫자만 고쳐 보내주세요.']);$('q').value=txt;$('q').dispatchEvent(new Event('input'));$('q').focus()}
  catch(err){t.remove();say([['사진을 못 읽었어요.','err'],'글자로 붙여넣어 주세요.'])}};
 const SI=['eye','coin','cal'],DESC=['할부원금 0원 · 고가 요금제 6개월','현금완납 45만원 · 페이백 10만원','할부원금 98만원 · 이자 5.9%'];
-(()=>{const h=document.createElement('section');h.className='hero';h.innerHTML=`<h2>견적서 속<br>숨은 비용 찾기</h2><p>견적서를 붙여넣거나 사진을 올리세요.</p><div class="samples" role="list"></div>`;
+(()=>{const h=document.createElement('section');h.className='hero';h.innerHTML=`<h2>견적서에 안 보이는<br>진짜 비용을 찾아드려요</h2><div class="samples" role="list"></div>`;
  Object.keys(SAMPLES).forEach((k,i)=>{const b=document.createElement('button');b.type='button';b.className='sample';b.setAttribute('role','listitem');b.innerHTML=`<span class="ic">${svg(SI[i])}</span><span class="tm"><span class="s">${k.split(' ').slice(1).join(' ')}</span><span class="d">${DESC[i]}</span></span><span class="chev" aria-hidden="true">›</span>`;b.onclick=()=>analyze(SAMPLES[k]);h.querySelector('.samples').append(b)});
  log.append(h)})();
 startChips();
