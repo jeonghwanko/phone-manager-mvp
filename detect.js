@@ -7,7 +7,7 @@ const esc=s=>String(s).replace(/[&<>]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;'}[
 let skip=false;const man=n=>{n=Math.round(n);return Math.abs(n)<1e4?W(n):(Math.round(n/1e3)/10).toLocaleString('ko-KR')+'만원'};
 function scroll(){log.scrollTo({top:log.scrollHeight,behavior:window.FAST||matchMedia('(prefers-reduced-motion: reduce)').matches?'auto':'smooth'})}
 function grp(who){const l=log.lastElementChild;if(l&&l.classList.contains('grp')&&l.classList.contains(who))return l.querySelector('.stack');
- const g=document.createElement('div');g.className='grp '+who;g.innerHTML=who==='bot'?'<div class="av" aria-hidden="true">🕵️</div><div class="stack"><div class="name">판독기</div></div>':'<div class="stack"></div>';log.append(g);return g.querySelector('.stack')}
+ const g=document.createElement('div');g.className='grp '+who;g.innerHTML=who==='bot'?'<div class="av" aria-hidden="true">'+svg('scan',18)+'</div><div class="stack"><div class="name">판독기</div></div>':'<div class="stack"></div>';log.append(g);return g.querySelector('.stack')}
 function me(t){const d=document.createElement('div');d.className='b me';d.textContent=t.length>220?t.slice(0,220)+'…':t;grp('me').append(d);scroll()}
 function typing(){const t=document.createElement('div');t.className='b bot';t.setAttribute('aria-label','입력 중');t.innerHTML='<span class="dots"><span></span><span></span><span></span></span>';grp('bot').append(t);scroll();return t}
 const wait=ms=>new Promise(r=>{if(skip)return r();const id=setInterval(()=>{if(skip){clearInterval(id);r()}},50);setTimeout(()=>{clearInterval(id);r()},ms)});
@@ -15,45 +15,50 @@ async function bot(h,cls=''){const t=typing();await wait(Math.min(900,500+h.repl
 async function say(list){skip=!!window.FAST;chips.innerHTML='';const sk=document.createElement('button');sk.type='button';sk.className='skip';sk.textContent='⏩ 전부 보기';sk.onclick=()=>{skip=true;sk.remove()};chips.append(sk);
  let last;for(const x of list)last=await(Array.isArray(x)?bot(x[0],x[1]):bot(x));sk.remove();skip=!!window.FAST;return last}
 function setChips(l){chips.innerHTML='';l.forEach(([x,f])=>{const b=document.createElement('button');b.type='button';b.textContent=x;b.onclick=f;chips.append(b)})}
-function startChips(){setChips([['📋 예시 견적서로 해보기',()=>{const h=document.querySelector('.hero');h&&h.scrollIntoView({behavior:'smooth'})}]])}
+function startChips(){setChips([['예시 견적서로 해보기',()=>{const h=document.querySelector('.hero');h&&h.scrollIntoView({behavior:'smooth'})}]])}
 function looksLikeQuote(t){return /(할부|요금제|출고가|완납|부가|페이백)/.test(t)&&/\d/.test(t)&&(t.length>25||/\n/.test(t))}
-const ICON={'고가 요금제 유지':'📶','할부원금 0원 착시':'🎭','부가서비스 끼워팔기':'🧩','할부 이자':'💳','카드 할인 조건':'🃏','페이백 약속':'🤝'};
+const P={signal:'<path d="M5 18v-3M10 18v-6M15 18V9M20 18V5"/>',eye:'<path d="M2 12s3.5-6 10-6 10 6 10 6-3.5 6-10 6S2 12 2 12z"/><circle cx="12" cy="12" r="2.5"/>',puzzle:'<rect x="4" y="4" width="7" height="7" rx="1.5"/><rect x="13" y="4" width="7" height="7" rx="1.5"/><rect x="4" y="13" width="7" height="7" rx="1.5"/><path d="M16.5 13.5v6M13.5 16.5h6"/>',
+ percent:'<path d="M19 5L5 19"/><circle cx="7" cy="7" r="2.2"/><circle cx="17" cy="17" r="2.2"/>',card:'<rect x="3" y="6" width="18" height="13" rx="2.5"/><path d="M3 10h18M7 15h4"/>',hand:'<path d="M12 3v12M7 10l5 5 5-5M5 21h14"/>',
+ scan:'<path d="M4 8V6a2 2 0 0 1 2-2h2M16 4h2a2 2 0 0 1 2 2v2M20 16v2a2 2 0 0 1-2 2h-2M8 20H6a2 2 0 0 1-2-2v-2M8 12h8"/>',cam:'<path d="M4 8h3l2-3h6l2 3h3v11H4z"/><circle cx="12" cy="13" r="3.5"/>',
+ send:'<path d="M12 19V5M6 11l6-6 6 6"/>',gift:'<rect x="4" y="9" width="16" height="11" rx="2"/><path d="M12 9v11M4 13h16M12 9c-2-4-6-3-5 0M12 9c2-4 6-3 5 0"/>',coin:'<circle cx="12" cy="12" r="8"/><path d="M12 8v8M9.5 10h4a1.5 1.5 0 0 1 0 3h-3a1.5 1.5 0 0 0 0 3h4"/>',cal:'<rect x="4" y="5" width="16" height="15" rx="2.5"/><path d="M4 10h16M9 3v4M15 3v4"/>'};
+const svg=(n,z=20)=>`<svg width="${z}" height="${z}" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">${P[n]}</svg>`;
+const ICON={'고가 요금제 유지':'signal','할부원금 0원 착시':'eye','부가서비스 끼워팔기':'puzzle','할부 이자':'percent','카드 할인 조건':'card','페이백 약속':'hand'};
 function trapAmt(x,r,q){if(x.won)return {v:x.won,l:'더 내는 돈'};if(x.t.includes('0원'))return {v:r.planExtra,l:'요금제로 내는 돈'};if(x.t.includes('카드'))return {v:q.cardSpend||0,l:'매달 써야 할 카드 실적'};if(x.t.includes('페이백'))return {v:r.cashback,l:'못 받을 수도 있는 돈'};return {v:0,l:''}}
 async function analyze(t){me(t);const q=Quote.parse(t);
  if(q.plan==null&&q.principal==null&&q.cash==null&&q.device==null)return say([['견적서에서 요금제·할부원금·현금완납 금액을 못 찾았어요 😢','err'],'"할부원금 0원, 요금제 109,000원 6개월 유지"처럼 붙여넣어 주세요.']).then(startChips);
  R={q,r:Quote.calc(q)};const r=R.r,exp=r.headline+r.base*24,mx=Math.max(r.total,exp,1),pc=v=>Math.max(0,v/mx*100).toFixed(1);
  const traps=r.traps.map(x=>({...x,a:trapAmt(x,r,q)})).sort((x,y)=>y.a.v-x.a.v);
  const rows=[['견적서 기기 금액(24개월분)',r.headline],['할부 이자',r.interest],['통신요금 24개월',r.comm],['부가서비스',r.addon],['페이백',-r.cashback],['실제 총액',r.total],['평소 요금×24개월',r.base*24]];
- const col=r.score>=60?'var(--danger)':r.score>=30?'#f59e0b':'var(--good)',dash=(r.score/100*238.8).toFixed(1);
- const list=[[`<div class="verdict"><div class="ring" role="img" aria-label="호갱 지수 ${r.score}점"><svg width="88" height="88"><circle cx="44" cy="44" r="38" fill="none" stroke="var(--surface2)" stroke-width="8"/><circle cx="44" cy="44" r="38" fill="none" stroke="${col}" stroke-width="8" stroke-linecap="round" stroke-dasharray="${dash} 238.8"/></svg><div class="v">${r.score}</div></div>
-  <div><div class="cap">숨은 비용</div><div class="big">${man(r.hidden)}</div><div class="vtitle">${r.title}</div></div></div>`,'card'],
-  [`<div class="ttl">견적서에 적힌 돈 vs 실제 24개월</div>
-  <div class="barrow"><div class="lab"><span>견적서대로 생각한 돈</span><b>${man(exp)}</b></div><div class="track"><div class="fill" style="width:${pc(exp)}%"><div class="seg-a" style="flex:1"></div></div></div></div>
-  <div class="barrow"><div class="lab"><span>실제 24개월 총액</span><b>${man(r.total)}</b></div><div class="track"><div class="fill" style="width:${pc(r.total)}%"><div class="seg-b" style="flex:${Math.max(0,r.total-r.hidden)}"></div><div class="seg-x" style="flex:${r.hidden}"></div></div></div></div>
-  <div class="gap">▲ 숨은 비용 <span class="num">${man(r.hidden)}</span></div><div class="cap" style="margin-top:8px">견적서대로 생각한 돈 = 기기 금액 + 평소 요금×24개월</div>
-  <details><summary>자세히</summary><table>${rows.map(([k,v])=>`<tr><td>${k}</td><td>${W(v)}</td></tr>`).join('')}</table>${r.ref.length?`<p class="cap">견적서에 없어서 쓴 <b>예시 기준값</b>: ${r.ref.join(', ')}</p>`:''}<p class="cap">숨은 비용 = 실제 총액 − 견적서 기기 금액 − 평소 요금×24개월</p></details>`,'card']];
- if(r.ref.length)list.push(`ℹ️ 견적서에 없는 값은 <b>예시 기준값</b>으로 계산했어요.`);
- list.push(traps.length?`🚨 함정 <b>${traps.length}개</b>를 찾았어요. 큰 것부터 볼게요.`:'뚜렷한 함정은 안 보여요 👍');
- traps.forEach(x=>list.push([`<div class="trap"><div class="ic" aria-hidden="true">${ICON[x.t]||'⚠️'}</div><div style="flex:1;min-width:0"><div class="t">${x.t}</div><div class="amt">${x.a.v?man(x.a.v):'-'}</div><div class="cap">${x.a.l}</div></div></div><details><summary>자세히</summary><div style="font-size:14px;color:var(--text2)">${esc(x.msg)}</div></details>`,'card']));
+ const col=r.score>=60?'var(--danger)':r.score>=30?'var(--warn)':'var(--good)',C=2*Math.PI*42,dash=(r.score/100*C).toFixed(1),lvl=r.score>=60?'hi':r.score>=30?'mid':'lo';
+ const list=[[`<div class="verdict ${lvl}"><div class="vtxt"><div class="eyebrow">24개월 숨은 비용</div><div class="big num">${man(r.hidden)}</div><div class="vtitle">${r.title}</div></div>
+  <div class="ring" role="img" aria-label="호갱 지수 ${r.score}점"><svg width="104" height="104" viewBox="0 0 104 104"><circle cx="52" cy="52" r="42" fill="none" stroke="currentColor" stroke-opacity=".12" stroke-width="7"/><circle cx="52" cy="52" r="42" fill="none" stroke="${col}" stroke-width="7" stroke-linecap="round" stroke-dasharray="${dash} ${C.toFixed(1)}"/></svg><div class="v"><b class="num">${r.score}</b><span>호갱 지수</span></div></div></div>`,'card hero-card'],
+  [`<div class="ttl">견적서 금액과 실제 금액</div>
+  <div class="barrow"><div class="lab"><span>견적서대로 생각한 돈</span><b class="num">${man(exp)}</b></div><div class="track"><div class="fill" style="width:${pc(exp)}%"><div class="seg-a" style="flex:1"></div></div></div></div>
+  <div class="barrow"><div class="lab"><span>실제 24개월 총액</span><b class="num">${man(r.total)}</b></div><div class="track"><div class="fill" style="width:${pc(r.total)}%"><div class="seg-b" style="flex:${Math.max(0,r.total-r.hidden)}"></div><div class="seg-x" style="flex:${r.hidden}"></div></div></div></div>
+  <div class="legend"><span><i class="dot db"></i>예상한 돈</span><span><i class="dot dx"></i>숨은 비용 <b class="num">${man(r.hidden)}</b></span></div>
+  <details><summary>자세히 보기</summary><table>${rows.map(([k,v])=>`<tr><td>${k}</td><td class="num">${W(v)}</td></tr>`).join('')}</table><p class="cap">견적서대로 생각한 돈 = 견적서 기기 금액 + 평소 요금×24개월. 숨은 비용 = 실제 총액 − 견적서 기기 금액 − 평소 요금×24개월.</p>${r.ref.length?`<p class="cap">견적서에 없어서 쓴 <b>예시 기준값</b>: ${r.ref.join(', ')}</p>`:''}</details>`,'card']];
+ if(r.ref.length)list.push(`견적서에 없는 값은 <b>예시 기준값</b>으로 계산했어요.`);
+ list.push(traps.length?`함정 <b>${traps.length}개</b>를 찾았어요. 큰 것부터 정리했어요.`:'뚜렷한 함정은 안 보여요.');
+ if(traps.length)list.push([`<div class="ttl">발견한 함정</div><ul class="traps">${traps.map(x=>`<li><details><summary><span class="ic">${svg(ICON[x.t]||'eye')}</span><span class="tm"><span class="t">${x.t}</span><span class="cap">${x.a.l}</span></span><span class="amt num">${x.a.v?man(x.a.v):'-'}</span></summary><p>${esc(x.msg)}</p></details></li>`).join('')}</ul><div class="cap" style="margin-top:8px">항목을 누르면 설명이 보여요</div>`,'card']);
  const act=[];if(q.addonCount)act.push(`개통일 +${q.addonMonths}개월 뒤 날짜에 <b>부가서비스 ${q.addonCount}개 해지</b> 알림을 맞춰두세요.`);
  if(r.planExtra)act.push(`<b>${q.planMonths}개월 뒤</b> 요금제를 평소 요금으로 바꾸세요. 판매점엔 "유지 기간 줄이면 얼마예요?"라고 물어보세요.`);
  if(r.interest)act.push(`"<b>현금완납</b>이면 얼마예요?" 물어보세요. 이자 <b>${man(r.interest)}</b>를 아낄 수 있어요.`);
  if(r.cashback)act.push(`페이백 <b>${man(r.cashback)}</b>은 계약서에 금액·지급일을 적어달라고 하세요.`);
  if(q.card&&act.length<3)act.push('카드 실적을 못 채우면 할인이 없어요. 할인 빼고 다시 계산해 달라고 하세요.');
- list.push([`<div class="ttl">이렇게 하세요</div><ul class="check">${(act.length?act:['지금 조건 그대로 진행해도 괜찮아 보여요.']).slice(0,3).map(x=>`<li><span>${x}</span></li>`).join('')}</ul>`,'card']);
- list.push([`<div class="share"><div class="ttl">친구한테 자랑하기</div><canvas width="1080" height="1080" aria-label="호갱 지수 공유 이미지"></canvas><div class="btns"><button class="btn dl" type="button">이미지 저장</button><button class="btn pri sh" type="button">공유하기</button></div></div>`,'card']);
+ list.push([`<div class="ttl">이렇게 하세요</div><ol class="steps">${(act.length?act:['지금 조건 그대로 진행해도 괜찮아 보여요.']).slice(0,3).map(x=>`<li><span>${x}</span></li>`).join('')}</ol>`,'card']);
+ list.push([`<div class="share"><div class="ttl">결과 공유하기</div><canvas width="1080" height="1080" aria-label="호갱 지수 공유 이미지"></canvas><div class="btns"><button class="btn dl" type="button">이미지 저장</button><button class="btn pri sh" type="button">공유하기</button></div></div>`,'card']);
  const c=await say(list);
  draw(c.querySelector('canvas'));c.querySelector('.dl').onclick=()=>{const a=document.createElement('a');a.href=c.querySelector('canvas').toDataURL('image/png');a.download='hogang.png';a.click()};c.querySelector('.sh').onclick=()=>share(c.querySelector('canvas'));
- await say(['궁금한 건 편하게 물어보세요 💬']);
+ await say(['궁금한 점은 편하게 물어보세요.']);
  setChips([['공유하기',()=>share(c.querySelector('canvas'))],['어떻게 깎아요?',()=>ask('어떻게 깎아요?')],['부가 언제 해지?',()=>ask('부가서비스 언제 해지해?')],['다른 견적서',()=>{R=null;say(['새 견적서를 붙여넣거나 📷 사진을 올려주세요.']).then(startChips)}]])}
-function draw(cv){const x=cv.getContext('2d'),r=R.r,F='"Pretendard Variable",Pretendard,"Apple SD Gothic Neo",sans-serif',col=r.score>=60?'#e5303b':r.score>=30?'#f59e0b':'#12a150';
- x.fillStyle='#f2f4f7';x.fillRect(0,0,1080,1080);x.fillStyle='#fff';x.beginPath();x.roundRect(60,60,960,960,48);x.fill();
- x.textAlign='center';x.fillStyle='#4e5968';x.font=`600 40px ${F}`;x.fillText('🕵️ 휴대폰 견적서 호갱 판독기',540,160);
- x.lineWidth=36;x.lineCap='round';x.strokeStyle='#eef0f3';x.beginPath();x.arc(540,400,150,0,Math.PI*2);x.stroke();
- x.strokeStyle=col;x.beginPath();x.arc(540,400,150,-Math.PI/2,-Math.PI/2+Math.PI*2*Math.max(.01,r.score/100));x.stroke();
- x.fillStyle='#191f28';x.font=`800 140px ${F}`;x.fillText(r.score,540,450);x.font=`700 64px ${F}`;x.fillText(r.title,540,680);
- x.fillStyle='#8b95a1';x.font=`500 36px ${F}`;x.fillText('숨은 비용',540,770);x.fillStyle='#e5303b';x.font=`800 80px ${F}`;x.fillText(man(r.hidden),540,860);
- x.fillStyle='#8b95a1';x.font=`500 30px ${F}`;x.fillText('너도 판독해봐 → jeonghwanko.github.io/phone-manager-mvp',540,960)}
+function draw(cv){const x=cv.getContext('2d'),r=R.r,F='"Pretendard Variable",Pretendard,"Apple SD Gothic Neo",sans-serif',col=r.score>=60?'#e8434d':r.score>=30?'#e8930c':'#10a05a';
+ x.fillStyle='#f4f5f7';x.fillRect(0,0,1080,1080);x.fillStyle='#fff';x.beginPath();x.roundRect(64,64,952,952,56);x.fill();
+ x.textAlign='left';x.fillStyle='#8b919a';x.font=`600 34px ${F}`;x.fillText('휴대폰 견적서 호갱 판독기',136,168);
+ x.fillStyle='#8b919a';x.font=`500 38px ${F}`;x.fillText('24개월 숨은 비용',136,300);x.fillStyle='#16181d';x.font=`800 124px ${F}`;x.letterSpacing='-4px';x.fillText(man(r.hidden),128,430);x.letterSpacing='0px';
+ x.fillStyle='#16181d';x.font=`700 50px ${F}`;x.fillText(r.title,136,520);
+ const cx=540,cy=740;x.lineWidth=26;x.lineCap='round';x.strokeStyle='#eef0f3';x.beginPath();x.arc(cx,cy,120,0,Math.PI*2);x.stroke();x.strokeStyle=col;x.beginPath();x.arc(cx,cy,120,-Math.PI/2,-Math.PI/2+Math.PI*2*Math.max(.01,r.score/100));x.stroke();
+ x.textAlign='center';x.fillStyle='#16181d';x.font=`800 96px ${F}`;x.fillText(r.score,cx,cy+28);x.fillStyle='#8b919a';x.font=`500 30px ${F}`;x.fillText('호갱 지수',cx,cy+80);
+ x.font=`500 28px ${F}`;x.fillText('jeonghwanko.github.io/phone-manager-mvp',540,960)}
 async function share(cv){const text=`내 휴대폰 견적서 호갱 지수 ${R.r.score}점 ${R.r.title} (숨은 비용 ${W(R.r.hidden)}) 너도 판독해봐 👉 ${location.href.split('#')[0]}`;
  try{const blob=await new Promise(r=>cv.toBlob(r,'image/png')),f=new File([blob],'hogang.png',{type:'image/png'});
   if(navigator.canShare&&navigator.canShare({files:[f]}))return await navigator.share({files:[f],text});if(navigator.share)return await navigator.share({text,url:location.href})}catch(e){if(e.name==='AbortError')return}
@@ -82,9 +87,9 @@ $('file').onchange=async e=>{const f=e.target.files[0];if(!f)return;e.target.val
   t.innerHTML='글자 읽는 중… <span class="num">0%</span><div class="prog"><i></i></div><div class="cap">처음엔 10~30초 걸려요</div>';const {data}=await Tesseract.recognize(f,'kor+eng',{logger:m=>{if(m.status==='recognizing text'){const p=Math.round(m.progress*100);t.querySelector('.num').textContent=p+'%';t.querySelector('.prog i').style.width=p+'%'}}});t.remove();const txt=data.text.trim();
   if(!txt)throw 0;await say(['사진에서 읽은 내용이에요. 틀린 숫자는 고쳐서 보내주세요 👇']);$('q').value=txt;$('q').dispatchEvent(new Event('input'));$('q').focus()}
  catch(err){t.remove();say([['사진에서 글자를 못 읽었어요 😢','err'],'견적서 내용을 직접 붙여넣어 주세요.'])}};
-const DESC={'😇 공짜폰이라는데?':'할부원금 0원 + 고가 요금제 6개월','💸 현금완납 특가':'현금완납 45만원 + 페이백 10만원','📄 36개월 할부':'할부원금 98만원 + 이자 5.9%'};
-(()=>{const h=document.createElement('section');h.className='hero';h.innerHTML=`<div class="logo" aria-hidden="true">🕵️</div><h2>대리점 견적서,<br>진짜 얼마 내는지 판독해 드려요</h2><p>붙여넣거나 📷 사진을 올리면 숨은 비용과 호갱 지수가 나와요.</p><div class="samples" role="list"></div>`;
- Object.keys(SAMPLES).forEach(k=>{const b=document.createElement('button');b.type='button';b.className='sample';b.setAttribute('role','listitem');b.innerHTML=`<span class="e" aria-hidden="true">${k.split(' ')[0]}</span><span><div class="s">${k.split(' ').slice(1).join(' ')}</div><div class="d">${DESC[k]} · 예시 견적서</div></span>`;b.onclick=()=>analyze(SAMPLES[k]);h.querySelector('.samples').append(b)});
+const SI=['eye','coin','cal'],DESC=['할부원금 0원 · 고가 요금제 6개월','현금완납 45만원 · 페이백 10만원','할부원금 98만원 · 이자 5.9%'];
+(()=>{const h=document.createElement('section');h.className='hero';h.innerHTML=`<div class="eyebrow">휴대폰 견적서 판독</div><h2>견적서에 안 보이는<br>진짜 비용을 찾아드려요</h2><p>붙여넣거나 사진을 올리면 24개월 실제 총액과 숨은 비용을 계산해요.</p><div class="samples" role="list"><div class="cap sl">예시 견적서로 해보기</div></div>`;
+ Object.keys(SAMPLES).forEach((k,i)=>{const b=document.createElement('button');b.type='button';b.className='sample';b.setAttribute('role','listitem');b.innerHTML=`<span class="ic">${svg(SI[i])}</span><span class="tm"><span class="s">${k.split(' ').slice(1).join(' ')}</span><span class="d">${DESC[i]}</span></span><span class="chev" aria-hidden="true">›</span>`;b.onclick=()=>analyze(SAMPLES[k]);h.querySelector('.samples').append(b)});
  log.append(h)})();
 startChips();
 if(location.hash==='#demo'){window.FAST=1;analyze(SAMPLES[Object.keys(SAMPLES)[0]])}
