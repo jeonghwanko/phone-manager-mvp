@@ -13,3 +13,4 @@ function loadGA(){if(window.gtag)return;const s=document.createElement('script')
 if(C.GA_ID){const k='pm_analytics';const v=localStorage.getItem(k);if(v==='y')loadGA();else if(v!=='n'){const b=document.createElement('div');b.className='cookie';
  b.innerHTML='방문 통계용 쿠키를 써도 될까요? <a href="privacy.html#analytics">자세히</a><span><button data-v="n">거부</button><button data-v="y">허용</button></span>';
  b.onclick=e=>{const x=e.target.dataset.v;if(!x)return;localStorage.setItem(k,x);b.remove();if(x==='y')loadGA()};document.body.append(b)}}})();
+localStorage.removeItem('pm_leads');localStorage.removeItem('pm_alerts');

@@ -35,7 +35,7 @@ NOTICE.md      서드파티 라이선스 고지
 quote.js       견적서 파서 + 계산기 (브라우저/Node 공용)
 detect.js      채팅 UI, OCR, 공유 카드, 후속 상담
 compare.html   예전 총비용 비교 채팅 (engine.js, parse.js, app.js, data.json)
-admin.html     견적 요청·알림 CRM(localStorage) + 선택적 LLM 설정
+admin.html     선택적 LLM 설정 (?admin)
 style.css      compare/admin 화면 스타일
 test.js        node 테스트
 docs/          스크린샷
@@ -50,10 +50,11 @@ python3 -m http.server 8000   # http://localhost:8000
 node test.js                  # 파서·계산기 테스트
 ```
 
-## 공개 운영 설정
-- `config.js`: `OPERATOR_NAME`, `CONTACT_EMAIL`, `LEAD_ENDPOINT`, `GA_ID` (모두 비어 있으면 문의는 GitHub 이슈, 견적 요청은 이용자 기기에만 저장, 분석 도구 미사용)
-- 견적 요청을 Google 시트로 받기: [docs/lead-sheet-setup.md](docs/lead-sheet-setup.md)
-- [이용약관](terms.html) · [개인정보처리방침](privacy.html)
+## 공개 운영 설정 (개인정보를 받지 않는 구조)
+- 이 서비스는 이름·연락처를 **받지 않습니다**. "판매점에 물어보기"는 금액만 담긴 요약을 복사하고, 이용자가 판매점(카카오톡 채널·전화)에 **직접** 연락합니다.
+- `config.js`: `OPERATOR_NAME`, `CONTACT_EMAIL`, `GA_ID`, `DEALERS` (모두 비어 있으면 문의는 GitHub 이슈, 분석 도구 미사용, "제휴 판매점 준비 중" + 요약 복사만 표시)
+- `DEALERS` 예: `{ name: '○○모바일 강남점', kakao: 'https://pf.kakao.com/_xxxx', tel: '', code: 'HOGANG10' }` (카카오 링크는 pf/open.kakao.com, 전화는 `tel:` 형식만 허용. `code`는 복사 문구에 들어가는 추천 코드). 제휴 판매점이 있으면 "운영자가 소개 혜택을 받을 수 있어요"가 함께 표시됩니다.
+- [이용약관](terms.html) · [개인정보처리방침](privacy.html) · [서드파티 고지](NOTICE.md)
 - 견적서 사진 OCR은 브라우저 안에서 실행되며 사진은 서버로 올라가지 않습니다.
 
 ## 데이터 주의사항

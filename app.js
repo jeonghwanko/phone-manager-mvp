@@ -41,7 +41,7 @@ function answer(q){const r=res[months],b=r.best,f=n=>r.options.find(o=>o.name===
  if(/가족|결합/.test(q))return A.family?'가족결합 할인은 같은 통신사에 남는 기기변경에만 반영했어요. 번호이동하면 할인이 사라질 수 있어요.':'가족결합을 안 쓰신다고 해서 할인은 넣지 않았어요.';
  if(/언제|시점|기다/.test(q))return r.remaining?`약정 만료(${A.contractEnd})까지 ${r.remaining}개월이에요. 만료 직후에 바꾸면 선택지가 가장 넓어요. '교체 알림 받기'를 눌러보세요.`:'지금 바꿔도 위약금이 없어 좋은 시점이에요.';
  if(/36|24|기간/.test(q)){const a=res[24].best,c=res[36].best;return `24개월 추천은 ${a.name}(${W(a.total)}), 36개월 추천은 ${c.name}(${W(c.total)})이에요.`}
- if(/견적|판매점|개통/.test(q))return '견적 요청은 메인 호갱 판독기에서 할 수 있어요.';
+ if(/견적|판매점|개통/.test(q))return '판매점 문의는 메인 호갱 판독기에서 할 수 있어요.';
  if(/왜|이유|추천|싸/.test(q)){const s=r.options[1];return `${b.name}이(가) ${s.name}보다 싸요. 요금 합계 ${W(b.plan)} vs ${W(s.plan)}, 단말 실구매가 ${W(b.device+b.subsidy)} vs ${W(s.device+s.subsidy)}.`}
  return '위약금, 할부 이자, 지원금, 알뜰폰, 가족결합, 교체 시점, 견적 요청에 대해 물어봐 주세요.'}
 async function followUp(q){
@@ -53,7 +53,7 @@ async function followUp(q){
   catch(e){t.remove()}}
  await bot(answer(q))}
 function formCard(html,onSave){bot(html,'card').then(el=>{el.querySelector('.save').onclick=()=>{const m=onSave(el);if(m)el.querySelector('.okmsg').textContent=m}})}
-function leadForm(){bot('견적 요청은 메인 호갱 판독기에서 할 수 있어요.')}
+function leadForm(){bot('판매점 문의는 메인 호갱 판독기에서 할 수 있어요.')}
 function alertForm(){bot('알림 신청은 지금 받지 않아요.')}
 $('bar').onsubmit=e=>{e.preventDefault();const t=$('q').value;$('q').value='';input(t)};
 fetch('data.json').then(r=>r.json()).then(async d=>{D=d;await bot('안녕하세요! 휴대폰 교체를 도와드리는 <b>폰매니저 AI</b>예요 🤖 몇 가지만 여쭤보고 가장 유리한 교체 방법을 찾아드릴게요.');ask()});

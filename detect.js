@@ -49,7 +49,7 @@ async function analyze(t){me(t);const q=Quote.parse(t);
  const c=await say(list);track('analyze_done');
  draw(c.querySelector('canvas'));c.querySelector('.dl').onclick=()=>{const a=document.createElement('a');a.href=c.querySelector('canvas').toDataURL('image/png');a.download='hogang.png';a.click()};c.querySelector('.sh').onclick=()=>share(c.querySelector('canvas'));
  await say(['더 궁금하면 물어보세요.']);
- setChips([['공유하기',()=>share(c.querySelector('canvas'))],['판매점 견적 받기',leadForm],['어떻게 깎아요?',()=>ask('어떻게 깎아요?')],['부가 언제 해지?',()=>ask('부가서비스 언제 해지해?')],['다른 견적서',()=>{R=null;say(['새 견적서를 올려주세요.']).then(startChips)}]])}
+ setChips([['공유하기',()=>share(c.querySelector('canvas'))],['판매점에 물어보기',askDealer],['어떻게 깎아요?',()=>ask('어떻게 깎아요?')],['부가 언제 해지?',()=>ask('부가서비스 언제 해지해?')],['다른 견적서',()=>{R=null;say(['새 견적서를 올려주세요.']).then(startChips)}]])}
 function draw(cv){const x=cv.getContext('2d'),r=R.r,F='"Pretendard Variable",Pretendard,"Apple SD Gothic Neo",sans-serif',col=r.score>=60?'#e8434d':r.score>=30?'#e8930c':'#10a05a';
  x.fillStyle='#f4f5f7';x.fillRect(0,0,1080,1080);x.fillStyle='#fff';x.beginPath();x.roundRect(64,64,952,952,56);x.fill();
  x.textAlign='left';x.fillStyle='#8b919a';x.font=`600 34px ${F}`;x.fillText('휴대폰 견적서 호갱 판독기',136,168);
@@ -63,21 +63,17 @@ async function share(cv){track('share');const text=`내 휴대폰 견적서 호�
   if(navigator.canShare&&navigator.canShare({files:[f]}))return await navigator.share({files:[f],text});if(navigator.share)return await navigator.share({text,url:location.href})}catch(e){if(e.name==='AbortError')return}
  try{await navigator.clipboard.writeText(text);say(['공유 문구를 복사했어요.'])}catch(e){say(['이미지 저장을 눌러주세요.'])}}
 const CF=window.CONFIG||{};
-function leadForm(){me('판매점 견적 받을래요');const r=R.r,q=R.q,sum=`실제 24개월 ${W(r.total)} · 숨은 비용 ${W(r.hidden)}${q.plan?` · 요금제 월 ${W(q.plan)}`:''}`;
- say([[`<form class="lead"><div class="ttl">판매점 견적 요청</div>
- <label for="ln">이름 또는 닉네임</label><input id="ln" type="text" maxlength="40" autocomplete="nickname" required>
- <label for="lp">연락처</label><input id="lp" type="tel" maxlength="20" placeholder="010-0000-0000" autocomplete="tel" required>
- <label for="la">희망 지역</label><input id="la" type="text" maxlength="40" placeholder="예: 서울 강남">
- <label>보낼 견적 요약</label><div class="sum">${sum}</div><input class="hp" name="website" tabindex="-1" autocomplete="off" aria-hidden="true">
- <label class="agree"><input type="checkbox" id="lc" required><span>(필수) 만 14세 이상이며, 견적 상담 연락을 위해 이름·연락처·지역·견적 요약을 수집하고 ${CF.RETENTION_MONTHS||6}개월 보관하는 데 동의해요. 동의하지 않으면 견적 요청만 할 수 없어요. <a href="privacy.html" target="_blank">개인정보처리방침</a></span></label>
- <div class="btns"><button class="btn pri" type="submit">견적 요청하기</button></div><div class="disc">${CF.LEAD_ENDPOINT?'':'지금은 이 기기에만 저장돼요. 판매점에 전달되지 않아요.'}</div></form>`,'card']]).then(el=>{
- const f=el.querySelector('form');f.onsubmit=async e=>{e.preventDefault();const v=id=>f.querySelector('#'+id).value.trim();
-  if(!/^01\d-?\d{3,4}-?\d{4}$/.test(v('lp')))return say([['연락처를 확인해 주세요.','err']]);if(!f.querySelector('#lc').checked)return;
-  const d={name:v('ln'),phone:v('lp'),area:v('la'),summary:sum,consent:'Y',consent_version:'2026-10-16',website:f.querySelector('.hp').value};
-  f.querySelector('button').disabled=true;track('lead_request');
-  if(CF.LEAD_ENDPOINT){try{await fetch(CF.LEAD_ENDPOINT,{method:'POST',mode:'no-cors',body:new URLSearchParams(d)});return say(['견적 요청을 보냈어요.'])}catch(err){f.querySelector('button').disabled=false;return say([['전송에 실패했어요. 다시 시도해 주세요.','err']])}}
-  const l=JSON.parse(localStorage.getItem('pm_leads')||'[]');delete d.website;l.push({createdAt:new Date().toISOString(),...d,status:'신규'});localStorage.setItem('pm_leads',JSON.stringify(l));
-  say(['이 기기에만 저장했어요.','판매점에는 전달되지 않아요.'])}})}
+function safeLink(u){u=String(u||'').trim();return /^https:\/\/(pf\.kakao\.com|open\.kakao\.com)\//.test(u)||/^tel:[0-9+\-]{6,20}$/.test(u)?u:''}
+function summaryText(code){const r=R.r,q=R.q,L=[`[휴대폰 견적 문의]`];
+ if(q.device!=null)L.push(`출고가 ${W(q.device)}`);if(q.principal!=null)L.push(`할부원금 ${W(q.principal)}`);if(q.cash!=null)L.push(`현금완납 ${W(q.cash)}`);
+ if(q.plan)L.push(`요금제 월 ${W(q.plan)} ${q.planMonths}개월 유지`);if(q.addonCount)L.push(`부가서비스 ${q.addonCount}개 ${q.addonMonths}개월`);if(q.cashback)L.push(`페이백 ${W(q.cashback)}`);
+ L.push(`판독 결과: 24개월 실제 ${W(r.total)}, 숨은 비용 ${W(r.hidden)}`);L.push('이 조건보다 나은 견적 있을까요?');if(code)L.push(`추천 코드: ${code}`);return L.join('\n')}
+async function copy(t){try{await navigator.clipboard.writeText(t);return true}catch(e){const a=document.createElement('textarea');a.value=t;document.body.append(a);a.select();let ok=false;try{ok=document.execCommand('copy')}catch(_){}a.remove();return ok}}
+function askDealer(){me('이 견적으로 판매점에 물어볼래요');const D=(CF.DEALERS||[]).map(d=>({...d,link:safeLink(d.kakao)||safeLink(d.tel)})).filter(d=>d.name&&d.link);
+ const rows=D.length?`<ul class="traps">${D.map((d,i)=>`<li><button type="button" class="dealer" data-i="${i}"><span class="tm"><span class="t">${esc(d.name)}</span><span class="cap">${d.link.startsWith('tel:')?'전화':'카카오톡'}${d.code?' · 추천 코드 포함':''}</span></span><span class="amt" style="color:var(--brand)">문의 ›</span></button></li>`).join('')}</ul><div class="disc">제휴 판매점이에요. 운영자가 소개 혜택을 받을 수 있어요.</div>`:`<p style="margin:0 0 4px">제휴 판매점 준비 중이에요.</p>`;
+ say([[`<div class="ttl">판매점에 직접 물어보기</div>${rows}<div class="btns"><button class="btn${D.length?'':' pri'} cp" type="button">견적 요약 복사</button></div><div class="disc">요약에는 금액만 들어가요. 판매점과 직접 연락하며, 운영자는 개인정보를 받지 않아요.</div>`,'card']]).then(el=>{
+  el.querySelector('.cp').onclick=async()=>{track('copy_summary');say([await copy(summaryText())?'요약을 복사했어요.':['복사하지 못했어요.','err']])};
+  el.querySelectorAll('.dealer').forEach(b=>b.onclick=async()=>{const d=D[+b.dataset.i];await copy(summaryText(d.code));track('dealer_click');window.open(d.link,d.link.startsWith('tel:')?'_self':'_blank','noopener')})})}
 function answer(q){const r=R.r,f=k=>r.traps.find(t=>t.t.includes(k));
  if(/부가|해지/.test(q))return R.q.addonCount?`부가서비스 ${R.q.addonCount}개는 ${R.q.addonMonths}개월 유지 조건이에요. 개통일로부터 ${R.q.addonMonths}개월 + 하루 뒤에 통신사 앱이나 114로 해지하세요. 총 ${W(r.addon)}이에요.`:'견적서에 부가서비스 조건이 없어요.';
  if(/깎|협상|싸게|줄이/.test(q))return `① 고가 요금제 유지 기간을 줄여달라고 하기${r.planExtra?` (지금 차액 ${W(r.planExtra)})`:''} ② 부가서비스 빼달라고 하기${r.addon?` (${W(r.addon)})`:''} ③ 현금완납 가격을 물어보기${r.interest?` (이자 ${W(r.interest)} 절약)`:''} ④ 페이백은 계약서에 적어달라고 하기.`;
@@ -87,7 +83,7 @@ function answer(q){const r=R.r,f=k=>r.traps.find(t=>t.t.includes(k));
  if(/요금제|0원|공짜/.test(q))return f('요금제')?f('요금제').msg:'요금제 유지 조건으로 생기는 추가 비용은 없어 보여요.';
  if(/점수|지수|호갱/.test(q))return `호갱 지수는 숨은 비용(7천원당 1점)과 함정 개수(개당 4점)로 매겨요. 지금 ${r.score}점이에요.`;
  return '부가서비스 해지, 깎는 법, 현금완납·이자, 카드 조건, 페이백, 요금제 유지에 대해 물어보세요.'}
-async function ask(q){if(/견적\s*(요청|받)|판매점/.test(q)&&R)return leadForm();me(q);if(LLM&&LLM.endpoint){const t=typing();try{history.push({role:'user',content:q});
+async function ask(q){if(/견적\s*(요청|받)|판매점/.test(q)&&R)return askDealer();me(q);if(LLM&&LLM.endpoint){const t=typing();try{history.push({role:'user',content:q});
  const res=await fetch(LLM.endpoint,{method:'POST',headers:{'Content-Type':'application/json',...(LLM.key?{Authorization:'Bearer '+LLM.key}:{})},body:JSON.stringify({model:LLM.model||'gpt-4o-mini',
   messages:[{role:'system',content:'너는 휴대폰 견적서 호갱 판독기 상담원이다. 아래 견적서와 계산 결과의 숫자만 근거로 쉬운 한국어로 짧게 답하라. 숫자를 지어내지 마라. 예시 기준값은 그렇다고 밝혀라.\n'+JSON.stringify({quote:R.q,result:R.r})},...history.slice(-8)]})});
  const j=await res.json(),a=j.choices?.[0]?.message?.content||j.reply||j.output_text;if(!a)throw 0;history.push({role:'assistant',content:a});t.remove();await say(a.split(/\n+|(?<=[.!?])\s+/).filter(Boolean).map(esc));return}catch(e){t.remove()}}
