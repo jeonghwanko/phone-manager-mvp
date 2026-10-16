@@ -1,31 +1,7 @@
 <!doctype html><html lang="ko"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
-<title>폰매니저 AI - 휴대폰 교체 매니저 (MVP)</title><link rel="stylesheet" href="style.css"></head><body><main>
-<h1>📱 폰매니저 AI</h1><p class="small">휴대폰, 바꿀 때 되면 AI가 알아서 — 교체 방법별 총비용 비교 MVP</p>
-<div class="warn">⚠️ 모든 가격·지원금·요금제 숫자는 <b>예시 데이터 (실제 조건 아님)</b>입니다. 실제 계약 조건은 판매점에서 확인하세요.</div>
-<section class="card"><h2>1. 내 휴대폰 정보</h2><form id="f">
-<label>현재 휴대폰</label><input id="cur" value="갤럭시 S24">
-<label>통신사</label><select id="carrier"><option>SKT</option><option selected>KT</option><option>LGU+</option><option>알뜰폰</option></select>
-<label>현재 월 요금 (원)</label><input id="curPlan" type="number" value="80000">
-<label>약정 만료일</label><input id="end" type="date">
-<label>원하는 새 기종</label><select id="model"></select>
-<label>월 데이터 사용량 (GB)</label><input id="gb" type="number" value="20">
-<label>가족결합</label><select id="family"><option value="1">예</option><option value="0" selected>아니오</option></select>
-<label>할부 이자율 (연 %, 수정 가능)</label><input id="rate" type="number" step="0.1">
-<button>총비용 비교하기</button></form></section>
-<section class="card" id="res" hidden><h2>2. 총비용 비교 <span class="small">(예시 데이터 기준)</span></h2>
-<div class="tabs"><button type="button" data-m="24" class="on">24개월</button><button type="button" data-m="36">36개월</button></div>
-<div id="tbl"></div><p id="rec"></p></section>
-<section class="card" id="chatC" hidden><h2>3. AI 상담 <span class="small">(규칙 기반 안내)</span></h2>
-<div class="chat" id="chat"></div><div class="row"><input id="q" placeholder="예: 왜 이게 제일 싸요? / 위약금은? / 이자는?"><button id="send" type="button">보내기</button></div></section>
-<section class="card" id="leadC" hidden><h2>4. 판매점 견적 요청</h2>
-<label>이름</label><input id="ln"><label>연락처</label><input id="lp" type="tel" placeholder="010-0000-0000">
-<label>희망 지역</label><input id="la" placeholder="예: 서울 강남"><label>메모</label><textarea id="lm" rows="2"></textarea>
-<label><input type="checkbox" id="lc" style="width:auto"> 견적 요청을 위한 개인정보 수집·이용에 동의합니다</label>
-<button id="leadBtn" type="button">견적 요청하기</button><p id="leadOk" class="ok"></p>
-<p class="small">MVP: 요청은 이 브라우저(localStorage)에만 저장됩니다.</p></section>
-<section class="card"><h2>5. 교체 시점 알림 받기</h2>
-<p class="small">약정 만료 전에 "지금 바꾸는 게 유리할까요?" 알림을 드려요.</p>
-<label>연락처 또는 이메일</label><input id="ac"><label><input type="checkbox" id="aok" style="width:auto"> 교체 시점 알림 수신에 동의합니다</label>
-<button id="alertBtn" type="button">알림 받기</button><p id="alertOk" class="ok"></p></section>
-<p class="small">관리자: <a href="admin.html">견적 요청 CRM</a></p></main>
-<script src="engine.js"></script><script src="app.js"></script></body></html>
+<title>폰매니저 AI - 휴대폰 교체 상담</title><link rel="stylesheet" href="style.css"></head><body class="chatpage">
+<header class="top"><b>📱 폰매니저 AI</b> <span class="small" id="mode"></span>
+<div class="warn" style="margin-top:6px">⚠️ 가격·지원금·요금제는 <b>예시 데이터 (실제 조건 아님)</b>입니다.</div></header>
+<div id="log"></div><div id="chips"></div>
+<form id="bar"><input id="q" placeholder="메시지를 입력하세요" autocomplete="off"><button>전송</button></form>
+<script src="engine.js"></script><script src="parse.js"></script><script src="app.js"></script></body></html>

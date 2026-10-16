@@ -4,7 +4,13 @@
 <section class="card"><h2>견적 요청 (<span id="n"></span>건)</h2><div style="overflow:auto" id="t"></div>
 <button id="csv">CSV 내보내기</button></section>
 <section class="card"><h2>교체 시점 알림 신청 (<span id="an"></span>건)</h2><div style="overflow:auto" id="at"></div><button id="csv2">알림 CSV 내보내기</button></section>
+<section class="card"><h2>AI 연결 (선택)</h2><p class="small">OpenAI 호환 chat/completions 엔드포인트. 키는 이 브라우저 localStorage(pm_llm)에만 저장되고 사용자 브라우저에서 직접 호출돼요. 공개 배포에선 키가 노출되니 프록시 사용을 권장해요. 비우면 규칙 기반 상담.</p>
+<label>엔드포인트</label><input id="ep" placeholder="https://.../v1/chat/completions"><label>API 키</label><input id="ky" type="password"><label>모델</label><input id="md" placeholder="gpt-4o-mini">
+<button id="sv">저장</button><button id="rm" style="background:#999">삭제</button><p id="lo" class="ok"></p></section>
 <script>
+const C=JSON.parse(localStorage.getItem('pm_llm')||'{}');ep.value=C.endpoint||'';ky.value=C.key||'';md.value=C.model||'';
+sv.onclick=()=>{localStorage.setItem('pm_llm',JSON.stringify({endpoint:ep.value.trim(),key:ky.value.trim(),model:md.value.trim()}));lo.textContent='저장됨'};
+rm.onclick=()=>{localStorage.removeItem('pm_llm');ep.value=ky.value=md.value='';lo.textContent='삭제됨'};
 const get=k=>JSON.parse(localStorage.getItem(k)||'[]'),esc=s=>String(s??'').replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
 function table(rows,el){if(!rows.length){el.innerHTML='<p class="small">아직 없어요.</p>';return}const k=Object.keys(rows[0]);
  el.innerHTML='<table><tr>'+k.map(x=>`<th>${x}</th>`).join('')+'</tr>'+rows.map(r=>'<tr>'+k.map(x=>`<td>${esc(r[x])}</td>`).join('')+'</tr>').join('')+'</table>'}

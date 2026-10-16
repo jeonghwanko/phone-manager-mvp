@@ -4,3 +4,7 @@ a.equal(r.options.length,3);a.equal(r.remaining,6);
 r.options.forEach(o=>a.equal(o.total,Math.round(o.device+o.subsidy+o.interest+o.plan+o.addon+o.family+o.penalty)));
 a.ok(E.installment(1000000,0,24).interest===0);
 console.log('ok',r.options.map(o=>o.name+':'+o.total).join(', '));
+const P=require('./parse'),t=new Date("2026-10-16");
+a.equal(P.won('8만원'),80000);a.equal(P.won('8만 5천원'),85000);a.equal(P.carrier('kt요'),'KT');a.equal(P.carrier('유플러스'),'LGU+');
+a.equal(P.date('내년 3월',t),'2027-03-01');a.equal(P.model('아이폰17 프로',d.models),'아이폰 17 Pro');a.equal(P.model('s26',d.models),'갤럭시 S26');
+a.equal(P.gb('20GB'),20);a.equal(P.yesno('아니요'),false);console.log('parse ok');
