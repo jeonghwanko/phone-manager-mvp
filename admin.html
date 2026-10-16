@@ -1,13 +1,14 @@
 <!doctype html><html lang="ko"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
-<title>폰매니저 AI - 견적 요청 CRM</title><link rel="stylesheet" href="style.css"></head><body><main style="max-width:1000px">
+<title>폰매니저 AI - 견적 요청 CRM</title><link rel="icon" href="favicon.svg" type="image/svg+xml"><meta name="robots" content="noindex"><link rel="stylesheet" href="style.css"></head><body><main style="max-width:1000px">
 <h1>📋 견적 요청 CRM</h1><p class="small">MVP: 이 브라우저 localStorage의 데이터만 보여요. <a href="./">← 메인</a></p>
 <section class="card"><h2>견적 요청 (<span id="n"></span>건)</h2><div style="overflow:auto" id="t"></div>
 <button id="csv">CSV 내보내기</button></section>
 <section class="card"><h2>교체 시점 알림 신청 (<span id="an"></span>건)</h2><div style="overflow:auto" id="at"></div><button id="csv2">알림 CSV 내보내기</button></section>
-<section class="card"><h2>AI 연결 (선택)</h2><p class="small">OpenAI 호환 chat/completions 엔드포인트. 키는 이 브라우저 localStorage(pm_llm)에만 저장되고 사용자 브라우저에서 직접 호출돼요. 공개 배포에선 키가 노출되니 프록시 사용을 권장해요. 비우면 규칙 기반 상담.</p>
+<section class="card" id="llm" hidden><h2>AI 연결 (선택)</h2><p class="small">OpenAI 호환 chat/completions 엔드포인트. 키는 이 브라우저 localStorage(pm_llm)에만 저장되고 사용자 브라우저에서 직접 호출돼요. 공개 배포에선 키가 노출되니 프록시 사용을 권장해요. 비우면 규칙 기반 상담.</p>
 <label>엔드포인트</label><input id="ep" placeholder="https://.../v1/chat/completions"><label>API 키</label><input id="ky" type="password"><label>모델</label><input id="md" placeholder="gpt-4o-mini">
 <button id="sv">저장</button><button id="rm" style="background:#999">삭제</button><p id="lo" class="ok"></p></section>
 <script>
+if(new URLSearchParams(location.search).has('admin'))document.getElementById('llm').hidden=false;
 const C=JSON.parse(localStorage.getItem('pm_llm')||'{}');ep.value=C.endpoint||'';ky.value=C.key||'';md.value=C.model||'';
 sv.onclick=()=>{localStorage.setItem('pm_llm',JSON.stringify({endpoint:ep.value.trim(),key:ky.value.trim(),model:md.value.trim()}));lo.textContent='저장됨'};
 rm.onclick=()=>{localStorage.removeItem('pm_llm');ep.value=ky.value=md.value='';lo.textContent='삭제됨'};
@@ -19,4 +20,4 @@ function csv(rows,name){if(!rows.length)return alert('데이터가 없어요');c
  const a=document.createElement('a');a.href=URL.createObjectURL(b);a.download=name;a.click()}
 const L=get('pm_leads'),A=get('pm_alerts');n.textContent=L.length;an.textContent=A.length;table(L,t);table(A,at);
 document.getElementById('csv').onclick=()=>csv(L,'leads.csv');document.getElementById('csv2').onclick=()=>csv(A,'alerts.csv');
-</script></main></body></html>
+</script></main><div data-footer style="text-align:center;font-size:14px;padding:12px"></div><script src="config.js"></script><script src="common.js"></script></body></html>

@@ -1,0 +1,4 @@
+User-agent: *
+Allow: /
+Disallow: /admin.html
+Sitemap: https://jeonghwanko.github.io/phone-manager-mvp/sitemap.xml

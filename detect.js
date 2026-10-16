@@ -45,11 +45,11 @@ async function analyze(t){me(t);const q=Quote.parse(t);
  if(q.card)act.push(`<b>카드 할인</b> 빼고 다시 계산`);
  if(r.planExtra)act.push(`요금제 <b>유지 기간</b> 줄여달라기`);
  list.push([`<div class="ttl">이렇게 하세요</div><ol class="steps">${(act.length?act:['이대로 진행해도 괜찮아요.']).slice(0,3).map(x=>`<li><span>${x}</span></li>`).join('')}</ol>`,'card']);
- list.push([`<div class="share"><canvas width="1080" height="1080" aria-label="호갱 지수 공유 이미지"></canvas><div class="btns"><button class="btn dl" type="button">이미지 저장</button><button class="btn pri sh" type="button">공유하기</button></div></div>`,'card']);
- const c=await say(list);
+ list.push([`<div class="share"><canvas width="1080" height="1080" aria-label="호갱 지수 공유 이미지"></canvas><div class="btns"><button class="btn dl" type="button">이미지 저장</button><button class="btn pri sh" type="button">공유하기</button></div><div class="disc">참고용 계산이에요. 실제 계약 조건과 다를 수 있어요.</div>${footerHTML()}</div>`,'card']);
+ const c=await say(list);track('analyze_done');
  draw(c.querySelector('canvas'));c.querySelector('.dl').onclick=()=>{const a=document.createElement('a');a.href=c.querySelector('canvas').toDataURL('image/png');a.download='hogang.png';a.click()};c.querySelector('.sh').onclick=()=>share(c.querySelector('canvas'));
  await say(['더 궁금하면 물어보세요.']);
- setChips([['공유하기',()=>share(c.querySelector('canvas'))],['어떻게 깎아요?',()=>ask('어떻게 깎아요?')],['부가 언제 해지?',()=>ask('부가서비스 언제 해지해?')],['다른 견적서',()=>{R=null;say(['새 견적서를 올려주세요.']).then(startChips)}]])}
+ setChips([['공유하기',()=>share(c.querySelector('canvas'))],['판매점 견적 받기',leadForm],['어떻게 깎아요?',()=>ask('어떻게 깎아요?')],['부가 언제 해지?',()=>ask('부가서비스 언제 해지해?')],['다른 견적서',()=>{R=null;say(['새 견적서를 올려주세요.']).then(startChips)}]])}
 function draw(cv){const x=cv.getContext('2d'),r=R.r,F='"Pretendard Variable",Pretendard,"Apple SD Gothic Neo",sans-serif',col=r.score>=60?'#e8434d':r.score>=30?'#e8930c':'#10a05a';
  x.fillStyle='#f4f5f7';x.fillRect(0,0,1080,1080);x.fillStyle='#fff';x.beginPath();x.roundRect(64,64,952,952,56);x.fill();
  x.textAlign='left';x.fillStyle='#8b919a';x.font=`600 34px ${F}`;x.fillText('휴대폰 견적서 호갱 판독기',136,168);
@@ -58,10 +58,26 @@ function draw(cv){const x=cv.getContext('2d'),r=R.r,F='"Pretendard Variable",Pre
  const cx=540,cy=740;x.lineWidth=26;x.lineCap='round';x.strokeStyle='#eef0f3';x.beginPath();x.arc(cx,cy,120,0,Math.PI*2);x.stroke();x.strokeStyle=col;x.beginPath();x.arc(cx,cy,120,-Math.PI/2,-Math.PI/2+Math.PI*2*Math.max(.01,r.score/100));x.stroke();
  x.textAlign='center';x.fillStyle='#16181d';x.font=`800 96px ${F}`;x.fillText(r.score,cx,cy+28);x.fillStyle='#8b919a';x.font=`500 30px ${F}`;x.fillText('호갱 지수',cx,cy+80);
  x.font=`500 28px ${F}`;x.fillText('jeonghwanko.github.io/phone-manager-mvp',540,960)}
-async function share(cv){const text=`내 휴대폰 견적서 호갱 지수 ${R.r.score}점 ${R.r.title} (숨은 비용 ${W(R.r.hidden)}) 너도 판독해봐 👉 ${location.href.split('#')[0]}`;
+async function share(cv){track('share');const text=`내 휴대폰 견적서 호갱 지수 ${R.r.score}점 ${R.r.title} (숨은 비용 ${W(R.r.hidden)}) 너도 판독해봐 👉 ${location.href.split('#')[0]}`;
  try{const blob=await new Promise(r=>cv.toBlob(r,'image/png')),f=new File([blob],'hogang.png',{type:'image/png'});
   if(navigator.canShare&&navigator.canShare({files:[f]}))return await navigator.share({files:[f],text});if(navigator.share)return await navigator.share({text,url:location.href})}catch(e){if(e.name==='AbortError')return}
  try{await navigator.clipboard.writeText(text);say(['공유 문구를 복사했어요.'])}catch(e){say(['이미지 저장을 눌러주세요.'])}}
+const CF=window.CONFIG||{};
+function leadForm(){me('판매점 견적 받을래요');const r=R.r,q=R.q,sum=`실제 24개월 ${W(r.total)} · 숨은 비용 ${W(r.hidden)}${q.plan?` · 요금제 월 ${W(q.plan)}`:''}`;
+ say([[`<form class="lead"><div class="ttl">판매점 견적 요청</div>
+ <label for="ln">이름 또는 닉네임</label><input id="ln" type="text" maxlength="40" autocomplete="nickname" required>
+ <label for="lp">연락처</label><input id="lp" type="tel" maxlength="20" placeholder="010-0000-0000" autocomplete="tel" required>
+ <label for="la">희망 지역</label><input id="la" type="text" maxlength="40" placeholder="예: 서울 강남">
+ <label>보낼 견적 요약</label><div class="sum">${sum}</div><input class="hp" name="website" tabindex="-1" autocomplete="off" aria-hidden="true">
+ <label class="agree"><input type="checkbox" id="lc" required><span>(필수) 견적 상담을 위해 이름·연락처·지역·견적 요약을 ${CF.RETENTION_MONTHS||6}개월간 보관하는 데 동의해요. <a href="privacy.html" target="_blank">개인정보처리방침</a></span></label>
+ <div class="btns"><button class="btn pri" type="submit">견적 요청하기</button></div><div class="disc">${CF.LEAD_ENDPOINT?'':'지금은 이 기기에만 저장돼요. 판매점에 전달되지 않아요.'}</div></form>`,'card']]).then(el=>{
+ const f=el.querySelector('form');f.onsubmit=async e=>{e.preventDefault();const v=id=>f.querySelector('#'+id).value.trim();
+  if(!/^01\d-?\d{3,4}-?\d{4}$/.test(v('lp')))return say([['연락처를 확인해 주세요.','err']]);if(!f.querySelector('#lc').checked)return;
+  const d={name:v('ln'),phone:v('lp'),area:v('la'),summary:sum,consent:'Y',consent_version:'2026-10-16',website:f.querySelector('.hp').value};
+  f.querySelector('button').disabled=true;track('lead_request');
+  if(CF.LEAD_ENDPOINT){try{await fetch(CF.LEAD_ENDPOINT,{method:'POST',mode:'no-cors',body:new URLSearchParams(d)});return say(['견적 요청을 보냈어요.'])}catch(err){f.querySelector('button').disabled=false;return say([['전송에 실패했어요. 다시 시도해 주세요.','err']])}}
+  const l=JSON.parse(localStorage.getItem('pm_leads')||'[]');delete d.website;l.push({createdAt:new Date().toISOString(),...d,status:'신규'});localStorage.setItem('pm_leads',JSON.stringify(l));
+  say(['이 기기에만 저장했어요.','판매점에는 전달되지 않아요.'])}})}
 function answer(q){const r=R.r,f=k=>r.traps.find(t=>t.t.includes(k));
  if(/부가|해지/.test(q))return R.q.addonCount?`부가서비스 ${R.q.addonCount}개는 ${R.q.addonMonths}개월 유지 조건이에요. 개통일로부터 ${R.q.addonMonths}개월 + 하루 뒤에 통신사 앱이나 114로 해지하세요. 총 ${W(r.addon)}이에요.`:'견적서에 부가서비스 조건이 없어요.';
  if(/깎|협상|싸게|줄이/.test(q))return `① 고가 요금제 유지 기간을 줄여달라고 하기${r.planExtra?` (지금 차액 ${W(r.planExtra)})`:''} ② 부가서비스 빼달라고 하기${r.addon?` (${W(r.addon)})`:''} ③ 현금완납 가격을 물어보기${r.interest?` (이자 ${W(r.interest)} 절약)`:''} ④ 페이백은 계약서에 적어달라고 하기.`;
@@ -71,7 +87,7 @@ function answer(q){const r=R.r,f=k=>r.traps.find(t=>t.t.includes(k));
  if(/요금제|0원|공짜/.test(q))return f('요금제')?f('요금제').msg:'요금제 유지 조건으로 생기는 추가 비용은 없어 보여요.';
  if(/점수|지수|호갱/.test(q))return `호갱 지수는 숨은 비용(7천원당 1점)과 함정 개수(개당 4점)로 매겨요. 지금 ${r.score}점이에요.`;
  return '부가서비스 해지, 깎는 법, 현금완납·이자, 카드 조건, 페이백, 요금제 유지에 대해 물어보세요.'}
-async function ask(q){me(q);if(LLM&&LLM.endpoint){const t=typing();try{history.push({role:'user',content:q});
+async function ask(q){if(/견적\s*(요청|받)|판매점/.test(q)&&R)return leadForm();me(q);if(LLM&&LLM.endpoint){const t=typing();try{history.push({role:'user',content:q});
  const res=await fetch(LLM.endpoint,{method:'POST',headers:{'Content-Type':'application/json',...(LLM.key?{Authorization:'Bearer '+LLM.key}:{})},body:JSON.stringify({model:LLM.model||'gpt-4o-mini',
   messages:[{role:'system',content:'너는 휴대폰 견적서 호갱 판독기 상담원이다. 아래 견적서와 계산 결과의 숫자만 근거로 쉬운 한국어로 짧게 답하라. 숫자를 지어내지 마라. 예시 기준값은 그렇다고 밝혀라.\n'+JSON.stringify({quote:R.q,result:R.r})},...history.slice(-8)]})});
  const j=await res.json(),a=j.choices?.[0]?.message?.content||j.reply||j.output_text;if(!a)throw 0;history.push({role:'assistant',content:a});t.remove();await say(a.split(/\n+|(?<=[.!?])\s+/).filter(Boolean).map(esc));return}catch(e){t.remove()}}
@@ -89,6 +105,6 @@ $('file').onchange=async e=>{const f=e.target.files[0];if(!f)return;e.target.val
 const SI=['eye','coin','cal'],DESC=['할부원금 0원 · 고가 요금제 6개월','현금완납 45만원 · 페이백 10만원','할부원금 98만원 · 이자 5.9%'];
 (()=>{const h=document.createElement('section');h.className='hero';h.innerHTML=`<h2>견적서에 안 보이는<br>진짜 비용을 찾아드려요</h2><div class="samples" role="list"></div>`;
  Object.keys(SAMPLES).forEach((k,i)=>{const b=document.createElement('button');b.type='button';b.className='sample';b.setAttribute('role','listitem');b.innerHTML=`<span class="ic">${svg(SI[i])}</span><span class="tm"><span class="s">${k.split(' ').slice(1).join(' ')}</span><span class="d">${DESC[i]}</span></span><span class="chev" aria-hidden="true">›</span>`;b.onclick=()=>analyze(SAMPLES[k]);h.querySelector('.samples').append(b)});
- log.append(h)})();
+ h.insertAdjacentHTML('beforeend',footerHTML());log.append(h)})();
 startChips();
 if(location.hash==='#demo'){window.FAST=1;analyze(SAMPLES[Object.keys(SAMPLES)[0]])}
