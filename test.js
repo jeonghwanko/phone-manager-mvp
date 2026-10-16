@@ -1,10 +1,6 @@
-const E=require('./engine'),d=require('./data.json'),a=require('assert');
-const r=E.compare({model:"갤럭시 S26",carrier:"KT",dataGB:30,contractEnd:"2027-04-16",family:true,today:new Date("2026-10-16")},d,24);
-a.equal(r.options.length,3);a.equal(r.remaining,6);
-r.options.forEach(o=>a.equal(o.total,Math.round(o.device+o.subsidy+o.interest+o.plan+o.addon+o.family+o.penalty)));
-a.ok(E.installment(1000000,0,24).interest===0);
-console.log('ok',r.options.map(o=>o.name+':'+o.total).join(', '));
-const P=require('./parse'),t=new Date("2026-10-16");
-a.equal(P.won('8만원'),80000);a.equal(P.won('8만 5천원'),85000);a.equal(P.carrier('kt요'),'KT');a.equal(P.carrier('유플러스'),'LGU+');
-a.equal(P.date('내년 3월',t),'2027-03-01');a.equal(P.model('아이폰17 프로',d.models),'아이폰 17 Pro');a.equal(P.model('s26',d.models),'갤럭시 S26');
-a.equal(P.gb('20GB'),20);a.equal(P.yesno('아니요'),false);console.log('parse ok');
+const a=require('assert'),Q=require('./quote');
+const q=Q.parse('갤럭시 S26 출고가 125만원\n할부원금 0원\n요금제 109,000원 6개월 유지, 이후 요금제 55,000원\n부가 2개 월 9,900원 3개월\n카드 할인 월 1.5만원 (전월 실적 30만원)');
+a.equal(q.device,1250000);a.equal(q.principal,0);a.equal(q.plan,109000);a.equal(q.planMonths,6);a.equal(q.after,55000);a.equal(q.addonCount,2);a.equal(q.addonPrice,9900);a.equal(q.addonMonths,3);a.equal(q.cardSpend,300000);
+const r=Q.calc(q);a.equal(r.planExtra,324000);a.equal(r.addon,59400);a.equal(r.hidden,383400);a.equal(r.ref.length,0);a.ok(r.traps.some(t=>/할부원금 0원인데 요금제 차액으로 324,000원/.test(t.msg)));
+const q2=Q.parse('현금완납 45만원, 109 요금제 6개월');a.equal(q2.cash,450000);a.equal(q2.plan,109000);a.equal(Q.calc(q2).ref.length,1);
+console.log('ok',r.score,r.title);
