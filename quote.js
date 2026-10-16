@@ -38,11 +38,11 @@ function calc(q){const M=24,ref=[],traps=[],W=n=>Math.round(n).toLocaleString('k
  const hidden=Math.max(0,total-headline-base*M);
  if(planExtra>0)traps.push({t:'고가 요금제 유지',won:planExtra,msg:`월 ${W(plan)} 요금제를 ${planM}개월 유지해야 해서 평소 요금보다 ${W(planExtra)} 더 냅니다.`});
  if(q.principal===0&&planExtra>0)traps.push({t:'할부원금 0원 착시',won:0,msg:`할부원금 0원인데 요금제 차액으로 ${W(planExtra)} 냅니다. 공짜폰이 아니에요.`});
- if(addon>0)traps.push({t:'부가서비스 끼워팔기',won:addon,msg:`부가서비스 ${q.addonCount}개를 ${q.addonMonths}개월 유지하면 ${W(addon)}이 나가요. 해지 날짜를 꼭 달력에 적으세요.`});
+ if(addon>0)traps.push({t:'부가서비스 유지 조건',won:addon,msg:`부가서비스 ${q.addonCount}개를 ${q.addonMonths}개월 유지하면 ${W(addon)}이 나가요. 해지 날짜를 꼭 달력에 적으세요.`});
  if(interest>0)traps.push({t:'할부 이자',won:interest,msg:`할부원금 ${W(principal)}에 연 ${rate}% 이자가 붙어 24개월 동안 이자만 ${W(interest)}예요. 현금 완납이면 안 내도 돼요.`});
  if(q.card)traps.push({t:'카드 할인 조건',won:0,msg:`"${q.card.trim()}" — ${q.cardSpend?`매달 ${W(q.cardSpend)} 이상 써야`:'전월 실적을 채워야'} 할인돼요. 실적 못 채우면 할인이 사라져서 총액에 넣지 않았어요.`});
- if(cashback>0)traps.push({t:'페이백 약속',won:0,msg:`페이백 ${W(cashback)}은 총액에서 뺐지만, 구두 약속이면 못 받는 경우가 많아요. 계약서에 금액·지급일을 적어달라고 하세요.`});
+ if(cashback>0)traps.push({t:'페이백 조건',won:0,msg:`페이백 ${W(cashback)}은 총액에서 뺐지만, 구두로만 약속하면 나중에 확인이 어려울 수 있어요. 계약서에 금액·지급일을 적어달라고 하세요.`});
  const score=Math.min(100,Math.round(hidden/7000)+traps.length*4);
- const title=score>=80?'🏆 전설의 호갱님':score>=60?'🐟 대리점의 VIP 물주':score>=40?'😵 반쯤 털린 호갱':score>=20?'🤨 살짝 호갱 기운':'😎 호갱 면역자';
+ const title=score>=80?'🏆 전설의 호갱님':score>=60?'🐟 요금 넉넉히 내는 VIP':score>=40?'😵 반쯤 호갱':score>=20?'🤨 살짝 호갱 기운':'😎 호갱 면역자';
  return {M,base,principal,rate,interest,devicePaid,planExtra,addon,cashback,comm,total,headline,hidden,traps,score,title,ref}}
 const api={parse,calc,num,REF};if(typeof module!=='undefined')module.exports=api;else root.Quote=api})(this);

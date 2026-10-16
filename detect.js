@@ -22,7 +22,7 @@ const P={signal:'<path d="M5 18v-3M10 18v-6M15 18V9M20 18V5"/>',eye:'<path d="M2
  scan:'<path d="M4 8V6a2 2 0 0 1 2-2h2M16 4h2a2 2 0 0 1 2 2v2M20 16v2a2 2 0 0 1-2 2h-2M8 20H6a2 2 0 0 1-2-2v-2M8 12h8"/>',cam:'<path d="M4 8h3l2-3h6l2 3h3v11H4z"/><circle cx="12" cy="13" r="3.5"/>',
  send:'<path d="M12 19V5M6 11l6-6 6 6"/>',gift:'<rect x="4" y="9" width="16" height="11" rx="2"/><path d="M12 9v11M4 13h16M12 9c-2-4-6-3-5 0M12 9c2-4 6-3 5 0"/>',coin:'<circle cx="12" cy="12" r="8"/><path d="M12 8v8M9.5 10h4a1.5 1.5 0 0 1 0 3h-3a1.5 1.5 0 0 0 0 3h4"/>',cal:'<rect x="4" y="5" width="16" height="15" rx="2.5"/><path d="M4 10h16M9 3v4M15 3v4"/>'};
 const svg=(n,z=20)=>`<svg width="${z}" height="${z}" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">${P[n]}</svg>`;
-const ICON={'고가 요금제 유지':'signal','할부원금 0원 착시':'eye','부가서비스 끼워팔기':'puzzle','할부 이자':'percent','카드 할인 조건':'card','페이백 약속':'hand'};
+const ICON={'고가 요금제 유지':'signal','할부원금 0원 착시':'eye','부가서비스 유지 조건':'puzzle','할부 이자':'percent','카드 할인 조건':'card','페이백 조건':'hand'};
 function trapAmt(x,r,q){if(x.won)return {v:x.won,l:'더 내는 돈'};if(x.t.includes('0원'))return {v:r.planExtra,l:'요금제로 내는 돈'};if(x.t.includes('카드'))return {v:q.cardSpend||0,l:'매달 써야 할 카드 실적'};if(x.t.includes('페이백'))return {v:r.cashback,l:'못 받을 수도 있는 돈'};return {v:0,l:''}}
 async function analyze(t){me(t);const q=Quote.parse(t);
  if(q.plan==null&&q.principal==null&&q.cash==null&&q.device==null)return say([['금액을 못 찾았어요.','err'],'예: 할부원금 0원, 요금제 109,000원 6개월 유지']).then(startChips);
@@ -69,7 +69,7 @@ function leadForm(){me('판매점 견적 받을래요');const r=R.r,q=R.q,sum=`�
  <label for="lp">연락처</label><input id="lp" type="tel" maxlength="20" placeholder="010-0000-0000" autocomplete="tel" required>
  <label for="la">희망 지역</label><input id="la" type="text" maxlength="40" placeholder="예: 서울 강남">
  <label>보낼 견적 요약</label><div class="sum">${sum}</div><input class="hp" name="website" tabindex="-1" autocomplete="off" aria-hidden="true">
- <label class="agree"><input type="checkbox" id="lc" required><span>(필수) 견적 상담을 위해 이름·연락처·지역·견적 요약을 ${CF.RETENTION_MONTHS||6}개월간 보관하는 데 동의해요. <a href="privacy.html" target="_blank">개인정보처리방침</a></span></label>
+ <label class="agree"><input type="checkbox" id="lc" required><span>(필수) 만 14세 이상이며, 견적 상담 연락을 위해 이름·연락처·지역·견적 요약을 수집하고 ${CF.RETENTION_MONTHS||6}개월 보관하는 데 동의해요. 동의하지 않으면 견적 요청만 할 수 없어요. <a href="privacy.html" target="_blank">개인정보처리방침</a></span></label>
  <div class="btns"><button class="btn pri" type="submit">견적 요청하기</button></div><div class="disc">${CF.LEAD_ENDPOINT?'':'지금은 이 기기에만 저장돼요. 판매점에 전달되지 않아요.'}</div></form>`,'card']]).then(el=>{
  const f=el.querySelector('form');f.onsubmit=async e=>{e.preventDefault();const v=id=>f.querySelector('#'+id).value.trim();
   if(!/^01\d-?\d{3,4}-?\d{4}$/.test(v('lp')))return say([['연락처를 확인해 주세요.','err']]);if(!f.querySelector('#lc').checked)return;

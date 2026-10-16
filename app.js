@@ -28,8 +28,7 @@ function card(){const r=res[months],rows=[['단말기','device'],['지원금','s
  return `<b>${months}개월 총비용 비교</b> <span class="small">예시 데이터 (실제 조건 아님)</span><table><tr><th></th>${r.options.map(o=>`<th${o===r.best?' class="best"':''}>${o.name}</th>`).join('')}</tr>${rows.map(([k,f])=>`<tr${f==='total'?' class="best"':''}><td>${k}</td>${r.options.map(o=>`<td>${W(o[f])}</td>`).join('')}</tr>`).join('')}</table>
  <p>👉 추천: <b>${r.best.name}</b> · ${s.name}보다 약 <b>${W(s.total-r.best.total)}</b> 절약</p>${r.options.map(o=>`<div class="small">· ${o.name}: ${o.note}</div>`).join('')}`}
 function mainChips(){setChips([[months===24?'36개월로 보기':'24개월로 보기',()=>{months=months===24?36:24;me(months+'개월로 보여줘');bot(card(),'card')}],
- ['왜 이게 싸요?',()=>input('왜 이게 제일 싸요?')],['위약금은?',()=>input('위약금은?')],['판매점 견적 받기',()=>{me('판매점 견적 받을래요');leadForm()}],
- ['교체 알림 받기',()=>{me('교체 알림 받을래요');alertForm()}],['답변 수정',()=>setChips(Q.map((q,i)=>[q.k==='cur'?'현재 폰':q.q.slice(0,8)+'…',()=>edit(i)]))],['처음부터',()=>{A={};step=0;me('처음부터');ask()}]])}
+ ['왜 이게 싸요?',()=>input('왜 이게 제일 싸요?')],['위약금은?',()=>input('위약금은?')], ['답변 수정',()=>setChips(Q.map((q,i)=>[q.k==='cur'?'현재 폰':q.q.slice(0,8)+'…',()=>edit(i)]))],['처음부터',()=>{A={};step=0;me('처음부터');ask()}]])}
 async function result(){compute();const r=res[months];await bot(`정리해볼게요! ${A.cur} → ${A.model}, ${A.carrier}, 월 ${W(A.curPlan)}, 데이터 ${A.dataGB}GB, 가족결합 ${A.family?'예':'아니요'}. <span class="small">(내 말풍선을 누르면 수정돼요)</span>`);
  await bot(card(),'card');await bot(rule(''));mainChips()}
 function rule(q){return answer(q)}
@@ -42,10 +41,10 @@ function answer(q){const r=res[months],b=r.best,f=n=>r.options.find(o=>o.name===
  if(/가족|결합/.test(q))return A.family?'가족결합 할인은 같은 통신사에 남는 기기변경에만 반영했어요. 번호이동하면 할인이 사라질 수 있어요.':'가족결합을 안 쓰신다고 해서 할인은 넣지 않았어요.';
  if(/언제|시점|기다/.test(q))return r.remaining?`약정 만료(${A.contractEnd})까지 ${r.remaining}개월이에요. 만료 직후에 바꾸면 선택지가 가장 넓어요. '교체 알림 받기'를 눌러보세요.`:'지금 바꿔도 위약금이 없어 좋은 시점이에요.';
  if(/36|24|기간/.test(q)){const a=res[24].best,c=res[36].best;return `24개월 추천은 ${a.name}(${W(a.total)}), 36개월 추천은 ${c.name}(${W(c.total)})이에요.`}
- if(/견적|판매점|개통/.test(q))return '아래 "판매점 견적 받기"를 누르면 연락처를 남길 수 있어요.';
+ if(/견적|판매점|개통/.test(q))return '견적 요청은 메인 호갱 판독기에서 할 수 있어요.';
  if(/왜|이유|추천|싸/.test(q)){const s=r.options[1];return `${b.name}이(가) ${s.name}보다 싸요. 요금 합계 ${W(b.plan)} vs ${W(s.plan)}, 단말 실구매가 ${W(b.device+b.subsidy)} vs ${W(s.device+s.subsidy)}.`}
  return '위약금, 할부 이자, 지원금, 알뜰폰, 가족결합, 교체 시점, 견적 요청에 대해 물어봐 주세요.'}
-async function followUp(q){if(/견적/.test(q))return leadForm();if(/알림/.test(q))return alertForm();
+async function followUp(q){
  if(LLM&&LLM.endpoint){const t=document.createElement('div');t.className='b bot';t.innerHTML='<span class="dots"><span></span><span></span><span></span></span>';log.append(t);scroll();
   try{history.push({role:'user',content:q});const ctx={answers:A,months,result:res[months],notice:'모든 숫자는 예시 데이터 (실제 조건 아님)'};
    const r=await fetch(LLM.endpoint,{method:'POST',headers:{'Content-Type':'application/json',...(LLM.key?{Authorization:'Bearer '+LLM.key}:{})},
@@ -54,14 +53,7 @@ async function followUp(q){if(/견적/.test(q))return leadForm();if(/알림/.tes
   catch(e){t.remove()}}
  await bot(answer(q))}
 function formCard(html,onSave){bot(html,'card').then(el=>{el.querySelector('.save').onclick=()=>{const m=onSave(el);if(m)el.querySelector('.okmsg').textContent=m}})}
-function leadForm(){formCard(`<b>판매점 견적 요청</b><label>이름</label><input class="n"><label>연락처</label><input class="p" type="tel" placeholder="010-0000-0000"><label>희망 지역</label><input class="a"><label>메모</label><input class="m">
- <label><input type="checkbox" class="c" style="width:auto"> 견적 요청을 위한 개인정보 수집·이용에 동의합니다</label><button class="save" type="button">견적 요청하기</button><p class="ok okmsg"></p><p class="small">MVP: 이 브라우저(localStorage)에만 저장돼요.</p>`,el=>{
- const v=c=>el.querySelector(c).value;if(!v('.n')||!v('.p')){alert('이름과 연락처를 입력해 주세요');return}if(!el.querySelector('.c').checked){alert('개인정보 동의가 필요해요');return}
- const r=res[months],l=JSON.parse(localStorage.getItem('pm_leads')||'[]');l.push({createdAt:new Date().toISOString(),name:v('.n'),phone:v('.p'),area:v('.a'),memo:v('.m'),currentPhone:A.cur,carrier:A.carrier,contractEnd:A.contractEnd,model:A.model,dataGB:A.dataGB,family:A.family?'Y':'N',recommended:r.best.name,estTotal:r.best.total,months,status:'신규'});
- localStorage.setItem('pm_leads',JSON.stringify(l));return '✅ 견적 요청이 저장됐어요.'})}
-function alertForm(){formCard(`<b>교체 시점 알림 받기</b><p class="small">약정 만료(${A.contractEnd||'미입력'}) 전에 알려드려요.</p><label>연락처 또는 이메일</label><input class="ct">
- <label><input type="checkbox" class="c" style="width:auto"> 교체 시점 알림 수신에 동의합니다</label><button class="save" type="button">알림 받기</button><p class="ok okmsg"></p>`,el=>{
- if(!el.querySelector('.ct').value||!el.querySelector('.c').checked){alert('연락처와 동의가 필요해요');return}const a=JSON.parse(localStorage.getItem('pm_alerts')||'[]');
- a.push({createdAt:new Date().toISOString(),contact:el.querySelector('.ct').value,contractEnd:A.contractEnd,carrier:A.carrier});localStorage.setItem('pm_alerts',JSON.stringify(a));return '✅ 알림 신청 완료!'})}
+function leadForm(){bot('견적 요청은 메인 호갱 판독기에서 할 수 있어요.')}
+function alertForm(){bot('알림 신청은 지금 받지 않아요.')}
 $('bar').onsubmit=e=>{e.preventDefault();const t=$('q').value;$('q').value='';input(t)};
 fetch('data.json').then(r=>r.json()).then(async d=>{D=d;await bot('안녕하세요! 휴대폰 교체를 도와드리는 <b>폰매니저 AI</b>예요 🤖 몇 가지만 여쭤보고 가장 유리한 교체 방법을 찾아드릴게요.');ask()});

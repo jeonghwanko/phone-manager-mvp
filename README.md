@@ -31,6 +31,7 @@
 ```
 index.html     호갱 판독기 (메인)
 hogang.css     메인 화면 디자인 (Pretendard, 다크 모드)
+NOTICE.md      서드파티 라이선스 고지
 quote.js       견적서 파서 + 계산기 (브라우저/Node 공용)
 detect.js      채팅 UI, OCR, 공유 카드, 후속 상담
 compare.html   예전 총비용 비교 채팅 (engine.js, parse.js, app.js, data.json)
@@ -70,4 +71,4 @@ node test.js                  # 파서·계산기 테스트
 이슈와 PR 환영합니다. 특히 실제 견적서 문구 예시(개인정보 제거)로 파서를 개선하는 기여가 큰 도움이 됩니다. PR 전에 `node test.js`를 통과시켜 주세요.
 
 ## 라이선스
-[MIT](LICENSE) © 2026 Lucas Ko
+[MIT](LICENSE) © 2026 Lucas Ko · 서드파티 고지: [NOTICE.md](NOTICE.md)
