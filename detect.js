@@ -5,7 +5,7 @@ const SAMPLES={'😇 공짜폰이라는데?':'갤럭시 S26 출고가 125만원\
  '📄 36개월 할부':'갤럭시 Z 플립7 출고가 148만원\n할부원금 98만원 36개월 할부, 이자 5.9%\n요금제 월 8만9천원 24개월 유지, 평소 요금 6만원\n부가 1개 월 5,500원 2개월'};
 const esc=s=>String(s).replace(/[&<>]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;'}[c]));
 let skip=false;const man=n=>{n=Math.round(n);return Math.abs(n)<1e4?W(n):(Math.round(n/1e3)/10).toLocaleString('ko-KR')+'만원'};
-function scroll(){log.scrollTo({top:log.scrollHeight,behavior:'smooth'})}
+function scroll(){log.scrollTo({top:log.scrollHeight,behavior:window.FAST||matchMedia('(prefers-reduced-motion: reduce)').matches?'auto':'smooth'})}
 function grp(who){const l=log.lastElementChild;if(l&&l.classList.contains('grp')&&l.classList.contains(who))return l.querySelector('.stack');
  const g=document.createElement('div');g.className='grp '+who;g.innerHTML=who==='bot'?'<div class="av" aria-hidden="true">🕵️</div><div class="stack"><div class="name">판독기</div></div>':'<div class="stack"></div>';log.append(g);return g.querySelector('.stack')}
 function me(t){const d=document.createElement('div');d.className='b me';d.textContent=t.length>220?t.slice(0,220)+'…':t;grp('me').append(d);scroll()}
