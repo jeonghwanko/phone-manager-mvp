@@ -34,7 +34,7 @@ function calc(q){const M=24,ref=[],traps=[],W=n=>Math.round(n).toLocaleString('k
  const cashback=q.cashback||0;
  const comm=plan?plan*planM+base*(M-planM):base*M;
  const total=devicePaid+interest+comm+addon-cashback;
- const headline=(q.cash||0)+(q.principal!=null?q.principal:principal);
+ const headline=devicePaid; // 견적서 기기 금액 중 24개월 안에 내는 몫
  const hidden=Math.max(0,total-headline-base*M);
  if(planExtra>0)traps.push({t:'고가 요금제 유지',won:planExtra,msg:`월 ${W(plan)} 요금제를 ${planM}개월 유지해야 해서 평소 요금보다 ${W(planExtra)} 더 냅니다.`});
  if(q.principal===0&&planExtra>0)traps.push({t:'할부원금 0원 착시',won:0,msg:`할부원금 0원인데 요금제 차액으로 ${W(planExtra)} 냅니다. 공짜폰이 아니에요.`});
